@@ -55,7 +55,7 @@ def ask_ai():
     content = data.get('question')
     result = Gemini.generate_question(content)
     print("Câu trả lời của AI:",result)
-    return jsonify({'success':True,"content":"Not logged in"})
+    return jsonify({'success':True,"content":result})
 
 @app.route('/favicon.ico')
 def favicon():

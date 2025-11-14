@@ -3,7 +3,7 @@ import sys
 from dotenv import load_dotenv
 import os
 import mistune
-import json
+import json, re
 
 class Gemini:
     @staticmethod
@@ -43,5 +43,4 @@ class Gemini:
             model="gemini-2.0-flash",
             contents=content,
         )
-        print("Đáp án:",response.text)
-        return cls.extract_json_from_markdown(response.text)
+        return cls.extract_json_from_markdown(response.text) #Fix the extract from json markdown next please
