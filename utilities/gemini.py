@@ -33,8 +33,8 @@ class Gemini:
         if not GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
         try:
-            with open('question.txt', 'r', encoding='utf-8') as file:
-                content = file.read()
+            with open('./resources/prompts/question.txt', 'r', encoding='utf-8') as file:
+                content = file.read() # Change the file path if needed later please
         except FileNotFoundError:
             raise FileNotFoundError("question.txt file not found")
         content = content + context
@@ -43,4 +43,5 @@ class Gemini:
             model="gemini-2.0-flash",
             contents=content,
         )
+        print("Đáp án:",response.text)
         return cls.extract_json_from_markdown(response.text)

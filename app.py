@@ -49,6 +49,14 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('home'))
 
+@app.route('/ask_ai', methods = ["POST"])
+def ask_ai():
+    data = request.get_json()
+    content = data.get('question')
+    result = Gemini.generate_question(content)
+    print("Câu trả lời của AI:",result)
+    return jsonify({'success':True,"content":"Not logged in"})
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('resources/icons', 'favicon.ico')
