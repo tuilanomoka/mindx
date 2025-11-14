@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from utilities.database import Database
+from utilities.gemini import Gemini
 import os
 
 app = Flask(__name__)
