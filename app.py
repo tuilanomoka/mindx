@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import *
 from utilities.database import Database
 import os
 
@@ -46,6 +46,10 @@ def chat():
 def logout():
     session.pop('username', None)
     return redirect(url_for('home'))
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('resources/icons', 'favicon.ico')
 
 if __name__ == '__main__':
     app.run(debug=True)
