@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindX</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/welcome.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+    <div class="bg-animation"></div>
+    
+    <div id="welcome-page" class="page active">
+        <div class="welcome-container">
+            <div class="glow-wrapper">
+                <div class="welcome-card">
+                    <div class="card-header">
+                        <h1>MindX</h1>
+                        <p>Học toán cùng trợ lý AI</p>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <h3>📚 Chế độ học tập</h3>
+                            <p>...</p>
+                        </div>
+                        <div class="info-box">
+                            <h3>🎯 Chế độ rèn luyện</h3>
+                            <p>...</p>
+                        </div>
+                    </div>
+                    
+                    <button class="start-button" onclick="navigateToLogin()">Đăng nhập để bắt đầu</button>
+                    
+                    <div class="footer-text">
+                        Chưa có tài khoản? <a href="#" onclick="navigateToRegister(); return false;">Đăng ký ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="login-page" class="page">
+        <div class="auth-container">
+            <div class="glow-wrapper">
+                <div class="auth-card">
+                    <a href="#" class="back-link" onclick="navigateToWelcome(); return false;">
+                        ← Quay lại trang chủ
+                    </a>
+                    
+                    <div class="card-header">
+                        <h1>Đăng nhập</h1>
+                        <p>Chào mừng trở lại với MindX</p>
+                    </div>
+                    
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="login-email">Email hoặc tên đăng nhập</label>
+                            <input type="text" id="login-email" class="form-input" placeholder="example@email.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="login-password">Mật khẩu</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('login-password')">👁️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-footer" style="text-align: right; margin-top: 12px; margin-bottom: 0;">
+                            <a href="#">Quên mật khẩu?</a>
+                        </div>
+                        
+                        <button type="submit" class="primary-button">Đăng nhập</button>
+                    </form>
+                    
+                    <div class="divider">hoặc</div>
+                    
+                    <div class="footer-text">
+                        Chưa có tài khoản? <a href="#" onclick="navigateToRegister(); return false;">Đăng ký ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="register-page" class="page">
+        <div class="auth-container">
+            <div class="glow-wrapper">
+                <div class="auth-card">
+                    <a href="#" class="back-link" onclick="navigateToWelcome(); return false;">
+                        ← Quay lại trang chủ
+                    </a>
+                    
+                    <div class="card-header">
+                        <h1>Đăng ký</h1>
+                        <p>Tạo tài khoản MindX mới</p>
+                    </div>
+                    
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="register-username">Tên đăng nhập</label>
+                            <input type="text" id="register-username" class="form-input" placeholder="Chọn tên đăng nhập" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" class="form-input" placeholder="example@email.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-password">Mật khẩu</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="register-password" class="form-input" placeholder="Tối thiểu 8 ký tự" required minlength="8">
+                                <button type="button" class="toggle-password" onclick="togglePassword('register-password')">👁️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-confirm-password">Xác nhận mật khẩu</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="register-confirm-password" class="form-input" placeholder="Nhập lại mật khẩu" required>
+                                <button type="button" class="toggle-password" onclick="togglePassword('register-confirm-password')">👁️</button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="primary-button">Tạo tài khoản</button>
+                    </form>
+                    
+                    <div class="divider">hoặc</div>
+                    
+                    <div class="footer-text">
+                        Đã có tài khoản? <a href="#" onclick="navigateToLogin(); return false;">Đăng nhập</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="chat-page" class="page">
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>MindX</h2>
+                <button class="back-button" onclick="navigateToWelcome()">← Quay lại</button>
+            </div>
+            
+            <div class="chat-content">
+                <p style="color: #94a3b8;">...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/navigation.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
