@@ -56,43 +56,65 @@ function processAndDisplayData(data) {
     const solveDiv = document.getElementById('solve');
     problemDiv.innerHTML = '';
     solveDiv.innerHTML = '';
+    
     const questionData = data[0];
+    
+    // Render bài toán
     if (questionData.baitoan) {
-        const problemParagraph = document.createElement('p');
-        problemParagraph.textContent = questionData.baitoan;
-        problemDiv.appendChild(problemParagraph);
+        problemDiv.innerHTML = `<p>${questionData.baitoan}</p>`;
     }
+    
+    // Render lời giải
     if (questionData.loigiai && Array.isArray(questionData.loigiai)) {
-        questionData.loigiai.forEach((step, index) => {
-            const stepDiv = document.createElement('div');
-            stepDiv.id = `step-${index + 1}`;
-            stepDiv.className = 'step';
-            const stepLink = document.createElement('a');
-            stepLink.textContent = `Bước ${step.buoc}`;
-            stepLink.href = 'javascript:void(0);';
-            stepLink.style.cursor = 'pointer';
-            stepLink.style.textDecoration = 'underline';
-            let displayState = 0;
-            const updateDisplay = () => {
-                switch(displayState) {
-                    case 0:
-                        stepLink.textContent = `Bước ${step.buoc}`;
-                        break;
-                    case 1:
-                        stepLink.textContent = step.tomtat || `Bước ${step.buoc} - Tóm tắt`;
-                        break;
-                    case 2:
-                        stepLink.textContent = step.chitiet || `Bước ${step.buoc} - Chi tiết`;
-                        break;
-                }
-            };
-            stepLink.addEventListener('click', () => {
-                displayState = (displayState + 1) % 3;
-                updateDisplay();
+        const stepsHTML = questionData.loigiai.map((step, index) => `
+            <div id="step-${index + 1}" class="step">
+                <a href="javascript:void(0);" 
+                   class="step-link" 
+                   data-step="${index}"
+                   data-state="0"
+                   style="cursor: pointer; text-decoration: underline; margin-bottom: 10px; display: block;">
+                    Bước ${step.buoc}
+                </a>
+            </div>
+        `).join('');
+        
+        solveDiv.innerHTML = stepsHTML;
+        
+        // Thêm event listeners sau khi render HTML
+        setTimeout(() => {
+            document.querySelectorAll('.step-link').forEach(link => {
+                const stepIndex = parseInt(link.dataset.step);
+                const step = questionData.loigiai[stepIndex];
+                
+                link.addEventListener('click', function() {
+                    let state = parseInt(this.dataset.state);
+                    state = (state + 1) % 3;
+                    this.dataset.state = state;
+                    
+                    switch(state) {
+                        case 0:
+                            this.innerHTML = `Bước ${step.buoc}`;
+                            break;
+                        case 1:
+                            this.innerHTML = step.tomtat || `Bước ${step.buoc} - Tóm tắt`;
+                            break;
+                        case 2:
+                            this.innerHTML = step.chitiet || `Bước ${step.buoc} - Chi tiết`;
+                            break;
+                    }
+                    
+                    // Render MathJax sau khi thay đổi nội dung
+                    if (window.MathJax) {
+                        MathJax.typesetPromise([this]).catch(console.error);
+                    }
+                });
             });
-            stepDiv.appendChild(stepLink);
-            solveDiv.appendChild(stepDiv);
-        });
+        }, 0);
+    }
+    
+    // Render MathJax cho toàn bộ nội dung
+    if (window.MathJax) {
+        MathJax.typesetPromise([problemDiv, solveDiv]).catch(console.error);
     }
 }
 

@@ -90,7 +90,7 @@ def process_question():
         with open('resources/prompts/question.txt', 'r', encoding='utf-8') as file:
             content = file.read()
         
-        content = "Lớp = " + lop + "\n" + "Bài toán: " + question_data + "\n" + content
+        content = "Lớp = " + lop + "\n" + "Bài toán: $" + question_data + "$\n" + content
         questions_json = Gemini.generate_question(content)
         print(questions_json)
         import time

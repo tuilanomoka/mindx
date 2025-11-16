@@ -17,4 +17,20 @@
     {% endblock %}
     <script src="{{ url_for('static', filename='navigation.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],  // Công thức trong dòng
+                displayMath: [['$$', '$$'], ['\\[', '\\]']], // Công thức riêng biệt
+                processEscapes: true,
+                tags: 'ams'  // Đánh số công thức
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
 </html>
