@@ -2,6 +2,8 @@ from flask import *
 from utilities.database import Database
 from utilities.gemini import Gemini
 import os
+import sys
+import json
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -84,18 +86,20 @@ def process_question():
         data = request.get_json()
         lop = data.get('lop', '')
         question_data = data.get('question', '')
+
+        with open('resources/prompts/question.txt', 'r', encoding='utf-8') as file:
+            content = file.read()
         
-        print(f"Lớp: {lop}")
-        print(f"Bài toán: {question_data}")
-        
-        # Giả lập xử lý
+        content = "Lớp = " + lop + "\n" + "Bài toán: " + question_data + "\n" + content
+        questions_json = Gemini.generate_question(content)
+        print(questions_json)
         import time
         time.sleep(1)
         
         return jsonify({
             'status': 'success',
             'lop': lop,
-            'question': question_data,
+            'questions_json': questions_json,
             'ket_qua': f"Đã phân tích bài toán lớp {lop} và sẵn sàng cho câu trả lời!"
         })
         
