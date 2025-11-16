@@ -56,15 +56,10 @@ function processAndDisplayData(data) {
     const solveDiv = document.getElementById('solve');
     problemDiv.innerHTML = '';
     solveDiv.innerHTML = '';
-    
     const questionData = data[0];
-    
-    // Render bài toán
     if (questionData.baitoan) {
         problemDiv.innerHTML = `<p>${questionData.baitoan}</p>`;
     }
-    
-    // Render lời giải
     if (questionData.loigiai && Array.isArray(questionData.loigiai)) {
         const stepsHTML = questionData.loigiai.map((step, index) => `
             <div id="step-${index + 1}" class="step">
@@ -79,8 +74,6 @@ function processAndDisplayData(data) {
         `).join('');
         
         solveDiv.innerHTML = stepsHTML;
-        
-        // Thêm event listeners sau khi render HTML
         setTimeout(() => {
             document.querySelectorAll('.step-link').forEach(link => {
                 const stepIndex = parseInt(link.dataset.step);
@@ -102,8 +95,6 @@ function processAndDisplayData(data) {
                             this.innerHTML = step.chitiet || `Bước ${step.buoc} - Chi tiết`;
                             break;
                     }
-                    
-                    // Render MathJax sau khi thay đổi nội dung
                     if (window.MathJax) {
                         MathJax.typesetPromise([this]).catch(console.error);
                     }
@@ -111,8 +102,6 @@ function processAndDisplayData(data) {
             });
         }, 0);
     }
-    
-    // Render MathJax cho toàn bộ nội dung
     if (window.MathJax) {
         MathJax.typesetPromise([problemDiv, solveDiv]).catch(console.error);
     }

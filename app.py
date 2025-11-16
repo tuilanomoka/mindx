@@ -92,7 +92,6 @@ def process_question():
         
         content = "Lớp = " + lop + "\n" + "Bài toán: $" + question_data + "$\n" + content
         questions_json = Gemini.generate_question(content)
-        print(questions_json)
         import time
         time.sleep(1)
         
