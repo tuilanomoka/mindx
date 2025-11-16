@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block linkcss %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="glow-wrapper">
+        <div class="auth-card">
+            <a href="#" class="back-link" onclick="navigateToWelcome(); return false;">
+                ← Quay lại trang chủ
+            </a>
+            
+            <div class="card-header">
+                <h1>Đăng nhập</h1>
+                <p>Chào mừng trở lại với MindX</p>
+            </div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-email">Tên đăng nhập</label>
+                    <input type="text" id="login-username" class="form-input" placeholder="Tên đăng nhập của bạn" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Mật khẩu</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('login-password')">👁️</button>
+                    </div>
+                </div>
+                
+                <div class="form-footer" style="text-align: right; margin-top: 12px; margin-bottom: 0;">
+                    <a href="#">Quên mật khẩu?</a>
+                </div>
+                
+                <button type="submit" class="primary-button">Đăng nhập</button>
+            </form>
+            
+            <div class="divider">hoặc</div>
+            
+            <div class="footer-text">
+                Chưa có tài khoản? <a href="#" onclick="navigateToRegister(); return false;">Đăng ký ngay</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block linkjs %}
+        <script src="{{ url_for('static', filename='auth.js') }}"></script>
+{% endblock %}

@@ -8,9 +8,30 @@ app.secret_key = os.urandom(24)
 db = Database()
 
 @app.route('/')
-def home():
+def index():
     username = session.get('username')
     return render_template('index.html', username=username)
+
+@app.route('/login')
+def login_page():
+    username = session.get('username')
+    if 'username' in session:
+        return redirect(url_for('home'))
+    return render_template('login.html', username=username)
+
+@app.route('/register')
+def register_page():
+    username = session.get('username')
+    if 'username' in session:
+        return redirect(url_for('home'))
+    return render_template('register.html', username=username)
+
+@app.route('/home')
+def home_page():
+    username = session.get('username')
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    return render_template('home.html', username=username)
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -38,16 +59,16 @@ def register():
     else:
         return jsonify({'success': False, 'message': 'Đăng ký thất bại!'})
 
-@app.route('/chat')
-def chat():
+@app.route('/home')
+def home():
     if 'username' not in session:
-        return redirect(url_for('home'))
-    return "Trang chat - Chào mừng " + session['username']
+        return redirect(url_for('index'))
+    return "Trang home - Chào mừng " + session['username']
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('index'))
 
 @app.route('/ask_ai', methods = ["POST"])
 def ask_ai():

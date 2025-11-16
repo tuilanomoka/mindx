@@ -18,7 +18,7 @@ function handleLogin(event) {
     .then(data => {
         if (data.success) {
             alert(data.message);
-            navigateToChat();
+            navigateToHome();
         } else {
             alert(data.message);
         }

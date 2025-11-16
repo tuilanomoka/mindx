@@ -1,45 +1,33 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MindX</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-</head>
-<body>
-    <div class="bg-animation"></div>
-    
-    <!-- Welcome Page -->
-    <div id="welcome-page" class="page active">
-        {% include 'welcome_page.html' %}
+{% extends "base.html" %}
+{% block linkcss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+{% endblock %}
+{% block content %}
+<div class="welcome-container">
+    <div class="glow-wrapper">
+        <div class="welcome-card">
+            <div class="card-header">
+                <h1>MindX</h1>
+                <p>Học toán cùng trợ lý AI</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>📚 Chế độ học tập</h3>
+                    <p>...</p>
+                </div>
+                <div class="info-box">
+                    <h3>🎯 Chế độ rèn luyện</h3>
+                    <p>...</p>
+                </div>
+            </div>
+            
+            <button class="start-button" onclick="navigateToLogin()">Đăng nhập để bắt đầu</button>
+            
+            <div class="footer-text">
+                Chưa có tài khoản? <a href="#" onclick="navigateToRegister(); return false;">Đăng ký ngay</a>
+            </div>
+        </div>
     </div>
-    
-    <!-- Login Page -->
-    <div id="login-page" class="page">
-        {% include 'login_page.html' %}
-    </div>
-    
-    <!-- Register Page -->
-    <div id="register-page" class="page">
-        {% include 'register_page.html' %}
-    </div>
-    
-    <!-- Chat Page -->
-    <div id="chat-page" class="page">
-        {% include 'chat_page.html' %}
-    </div>
-    
-    <script src="{{ url_for('static', filename='auth.js') }}"></script>
-    <script src="{{ url_for('static', filename='import.js') }}"></script>
-    <script src="{{ url_for('static', filename='navigation.js') }}"></script>
-    <script src="{{ url_for('static', filename='check_login.js') }}"></script>
-    <script>
-        loadMathLive();
-        check_login();
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}
