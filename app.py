@@ -82,7 +82,7 @@ def practice_page():
 
 @app.route('/process-question', methods=['POST'])
 def process_question():
-    try:
+    if 'username' in session:
         data = request.get_json()
         lop = data.get('lop', '')
         question_data = data.get('question', '')
@@ -96,15 +96,7 @@ def process_question():
         import time
         time.sleep(1)
         
-        return jsonify({
-            'status': 'success',
-            'lop': lop,
-            'questions_json': questions_json,
-            'ket_qua': f"Đã phân tích bài toán lớp {lop} và sẵn sàng cho câu trả lời!"
-        })
-        
-    except Exception as e:
-        return jsonify({'error': str(e)})
+        return jsonify(questions_json)
 
 @app.route('/favicon.ico')
 def favicon():
