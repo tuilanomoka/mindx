@@ -54,24 +54,17 @@ async function submitMathQuestion() {
 function processAndDisplayData(data) {
     const problemDiv = document.getElementById('problem');
     const solveDiv = document.getElementById('solve');
-    var questions = document.getElementsByName("question");
     problemDiv.innerHTML = '';
     solveDiv.innerHTML = '';
+    
+    const mathField = document.getElementById('question');
+    const questionContent = mathField ? mathField.getValue() : '';
+    
+    if (questionContent) {
+        problemDiv.innerHTML = `\\[${questionContent}\\]`;
+    }
+    
     const questionData = data[0];
-    
-    if (questionData.baitoan) {
-        // Sửa ở đây: hiển thị nội dung thực của questionData.baitoan
-        problemDiv.innerHTML = `<p>${questionData.baitoan}</p>`;
-    }
-    
-    // Nếu bạn muốn lấy nội dung từ phần tử HTML có name="question"
-    if (questions.length > 0) {
-        // Ví dụ: lấy nội dung từ phần tử question đầu tiên
-        var questionContent = questions[0].textContent || questions[0].innerHTML;
-        console.log("Nội dung question:", questionContent);
-        // Có thể sử dụng questionContent ở đây nếu cần
-    }
-    
     if (questionData.loigiai && Array.isArray(questionData.loigiai)) {
         const stepsHTML = questionData.loigiai.map((step, index) => `
             <div id="step-${index + 1}" class="step">
