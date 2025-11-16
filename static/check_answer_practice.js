@@ -1,7 +1,14 @@
-function submit_answer()
+function check_answer_practice()
 {
-    var Question = document.getElementById("field").value;
-    //submit the question to server
+    try {
+        // TODO: Check result and display steps
+    } catch (error) {
+        // ERRROR handling
+    }
+}
+function confirm_practice()
+{
+    var Question = document.getElementById("question").value;
     fetch('/ask_ai', {
         method: 'POST',
         headers: {
@@ -12,11 +19,13 @@ function submit_answer()
         })
     })
     .then(response => response.json())
-    .then(data_ => {
-        if(data_.success)
+    .then(data => {
+        if(data.success)
         {
-            var result_field = document.getElementById("result_field");
-            var data = data_.content[0];
+            window.AnswerData = data.content[0];
+            //TODO: show the submit answer field
+            /*var result_field = document.getElementById("result_field");
+            var data = data.content[0];
             console.log(data);
             data["Buoc"].forEach(element => {
                 // handling data
@@ -30,11 +39,11 @@ function submit_answer()
                 const newElement = document.createElement('div');
                 const newElementTitle = "Đáp án: " + data["DapAn"]['KetQua'];
                 newElement.innerText = newElementTitle;
-                result_field.appendChild(newElement);
+                result_field.appendChild(newElement);*/
         }else{
             // error
+            alert("Có lỗi xảy ra!, " + data.content);
         }
-        console.log(data_);
     })
     .catch(error => {
         console.error('Error:', error);

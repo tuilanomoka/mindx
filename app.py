@@ -79,11 +79,14 @@ def pratice_page():
 
 @app.route('/ask_ai', methods = ["POST"])
 def ask_ai():
+    if 'username' not in session:
+        return jsonify({'success':False,"content":"Not logged in"})
     data = request.get_json()
     content = data.get('question')
     result = Gemini.generate_question(content)
-    print("Câu trả lời của AI:",result)
     return jsonify({'success':True,"content":result})
+
+
 
 @app.route('/favicon.ico')
 def favicon():
