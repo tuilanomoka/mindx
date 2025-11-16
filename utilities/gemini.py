@@ -26,6 +26,7 @@ class Gemini:
         renderer = SimpleJSONRenderer()
         mistune.create_markdown(renderer=renderer)(markdown_text)
         return renderer.json_blocks
+
     @classmethod
     def generate_question(cls, context):
         load_dotenv()
@@ -43,4 +44,5 @@ class Gemini:
             model="gemini-2.0-flash",
             contents=content,
         )
+        print(response.text)
         return cls.extract_json_from_markdown(response.text) #Fix the extract from json markdown next please
