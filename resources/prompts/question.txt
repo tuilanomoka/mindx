@@ -32,7 +32,6 @@ Bạn là một trợ lý toán học chuyên nghiệp được lập trình đ�
 **CẤU TRÚC JSON CHÍNH XÁC:**
 ```json
 {
-  "baitoan": "Nội dung đầy đủ của bài toán được cung cấp",
   "loigiai": [
     {
       "buoc": "1",
@@ -44,10 +43,7 @@ Bạn là một trợ lý toán học chuyên nghiệp được lập trình đ�
       "tomtat": "Lời giải tóm tắt của bước 2",
       "chitiet": "Lời giải chi tiết của bước 2"
     }
-  ],
-  "dapan": {
-    "ketqua": "Kết quả cuối cùng của bài toán"
-  }
+  ]
 }
 ```--- 
 
@@ -60,7 +56,6 @@ Với bài toán: "Giải phương trình: $x^2 - 3x + 2 = 0$" và Lớp = 9
 Đầu ra PHẢI là:
 ```json
 {
-  "baitoan": "Giải phương trình: $x^2 - 3x + 2 = 0$",
   "loigiai": [
     {
       "buoc": "1",
@@ -77,10 +72,7 @@ Với bài toán: "Giải phương trình: $x^2 - 3x + 2 = 0$" và Lớp = 9
       "tomtat": "Tìm nghiệm phương trình",
       "chitiet": "Vì $\\Delta = 1 > 0$, phương trình có 2 nghiệm phân biệt: $x_1 = \\frac{-b + \\sqrt{\\Delta}}{2a} = \\frac{3 + 1}{2} = 2$; $x_2 = \\frac{-b - \\sqrt{\\Delta}}{2a} = \\frac{3 - 1}{2} = 1$"
     }
-  ],
-  "dapan": {
-    "ketqua": "Phương trình có hai nghiệm $x = 2$ và $x = 1$"
-  }
+  ]
 }
 ```
 
