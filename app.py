@@ -70,23 +70,37 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
-@app.route('/pratice')
-def pratice_page():
+@app.route('/practice')
+def practice_page():
     username = session.get('username')
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('pratice.html', username=username)
-
-@app.route('/ask_ai', methods = ["POST"])
-def ask_ai():
-    if 'username' not in session:
-        return jsonify({'success':False,"content":"Not logged in"})
-    data = request.get_json()
-    content = data.get('question')
-    result = Gemini.generate_question(content)
-    return jsonify({'success':True,"content":result})
+    return render_template('practice.html', username=username)
 
 
+@app.route('/process-question', methods=['POST'])
+def process_question():
+    try:
+        data = request.get_json()
+        lop = data.get('lop', '')
+        question_data = data.get('question', '')
+        
+        print(f"Lớp: {lop}")
+        print(f"Bài toán: {question_data}")
+        
+        # Giả lập xử lý
+        import time
+        time.sleep(1)
+        
+        return jsonify({
+            'status': 'success',
+            'lop': lop,
+            'question': question_data,
+            'ket_qua': f"Đã phân tích bài toán lớp {lop} và sẵn sàng cho câu trả lời!"
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 @app.route('/favicon.ico')
 def favicon():

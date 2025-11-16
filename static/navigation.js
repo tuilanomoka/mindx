@@ -14,8 +14,8 @@ function navigateToLogout() {
     window.location.href = '/logout';
 }
 
-function navigateToPratice() {
-    window.location.href = '/pratice';
+function navigateTopractice() {
+    window.location.href = '/practice';
 }
 
 function navigateToHome() {

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block linkcss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='practice.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}">
+{% endblock %}
+{% block content %}
+<div>
+    <button onclick="navigateToHome();">
+        Quay lại
+    </button>
+</div>
+<div id="question_div">
+    <div>
+        <div>
+            <label for="lop">Chọn lớp:</label>
+            <select id="lop" name="lop">
+                <option value="1">Lớp 1</option>
+                <option value="2">Lớp 2</option>
+                <option value="3">Lớp 3</option>
+                <option value="4">Lớp 4</option>
+                <option value="5">Lớp 5</option>
+                <option value="6">Lớp 6</option>
+                <option value="7">Lớp 7</option>
+                <option value="8">Lớp 8</option>
+                <option value="9">Lớp 9</option>
+                <option value="10">Lớp 10</option>
+                <option value="11">Lớp 11</option>
+                <option value="12">Lớp 12</option>
+            </select>
+        </div>
+        <div>
+            <label for="question">Bài toán:</label>
+            <math-field 
+                virtual-keyboard-mode="auto" 
+                smart-fence 
+                id="question" 
+                name="question"
+                class="chat-container"
+                placeholder="Nhập biểu thức toán học..."
+            ></math-field>
+        </div>
+        <button type="button" onclick="submitMathQuestion()" id="submitBtn">
+            Xác nhận
+        </button>
+    </div>
+</div>
+<div id="hiddenSection" class="hidden">
+    <div>
+        <label for="user-answer">Trả lời:</label>
+        <math-field virtual-keyboard-mode="auto" smart-fence id="user-answer" class="chat-container"></math-field>
+        <button type="button" onclick="submitAnswer()">
+            Gửi
+        </button>
+    </div>
+</div>
+{% endblock %}
+{% block linkjs %}
+    <script src="{{ url_for('static', filename='practice.js') }}"></script>
+{% endblock %}
