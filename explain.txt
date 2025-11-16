@@ -1,0 +1,6 @@
+Ý tưởng:
+Ở phần gửi câu hỏi về gemini thì cho người dùng đầu tiên là chọn lớp từ 1 -> 12, sau đó là nhập yêu cầu bài toán như là
+[Begin]
+Lớp (Cho người dùng chọn một list lớp từ 1 tới 12)
+Bài toán (Cho người dùng nhập vào bài toán với bàn phím được lấy từ mathlive)
+[End]
