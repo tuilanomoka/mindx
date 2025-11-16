@@ -70,6 +70,13 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
+@app.route('/pratice')
+def pratice_page():
+    username = session.get('username')
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    return render_template('pratice.html', username=username)
+
 @app.route('/ask_ai', methods = ["POST"])
 def ask_ai():
     data = request.get_json()

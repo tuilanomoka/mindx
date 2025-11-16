@@ -3,5 +3,12 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
 {% endblock %}
 {% block content %}
-
+    <div>
+        <button onclick="navigateToPratice();">
+            Luyện tập
+        </button>
+        <button onclick="navigateToLogout();">
+            Đăng xuất
+        </button>
+    </div>
 {% endblock %}
