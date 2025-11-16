@@ -27,14 +27,19 @@
             Xác nhận
         </button>
     </div>
-    <div>
-        
+    <div class="hidden">
+        <div>
+            
+        </div>
+        <div>
+            <label for="user-answer">Trả lời:</label>
+            <math-field virtual-keyboard-mode="auto" smart-fence id = "user-answer"></math-field>
+            <button>
+                Gửi
+            </button>
+        </div>
     </div>
-    <div>
-        <label for="user-answer">Trả lời:</label>
-        <math-field virtual-keyboard-mode="auto" smart-fence id = "user-answer"></math-field>
-        <button>
-            Gửi
-        </button>
-    </div>
+{% endblock %}
+{% block linkcss %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='pratice.css') }}">
 {% endblock %}
