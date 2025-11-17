@@ -33,12 +33,7 @@ class Gemini:
         GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
         if not GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
-        try:
-            with open('./resources/prompts/question.txt', 'r', encoding='utf-8') as file:
-                content = file.read() # Change the file path if needed later please
-        except FileNotFoundError:
-            raise FileNotFoundError("question.txt file not found")
-        content = content + context
+        content = context
         client = genai.Client(api_key=GEMINI_API_KEY)
         response = client.models.generate_content(
             model="gemini-2.0-flash",

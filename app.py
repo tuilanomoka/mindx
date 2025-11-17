@@ -99,5 +99,39 @@ def process_question():
 def favicon():
     return send_from_directory('resources/icons', 'favicon.ico')
 
+@app.route('/process-answer', methods=['POST'])
+def process_answer():
+    if 'username' not in session:
+        return jsonify({'error': 'Chưa đăng nhập'}), 401
+    
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Không có dữ liệu được gửi lên'}), 400
+            
+        lop = data.get('lop', '')
+        question = data.get('question', '')
+        user_answer = data.get('user_answer', '')
+
+        if not question or not user_answer:
+            return jsonify({'error': 'Thiếu thông tin câu hỏi hoặc câu trả lời'}), 400
+
+        with open('resources/prompts/compare.txt', 'r', encoding='utf-8') as file:
+            content = file.read()
+
+        prompt = f"Lớp: {lop}\nCâu hỏi: {question}\nCâu trả lời của học sinh: {user_answer}\n\n{content}"
+
+        compare_result = Gemini.generate_question(prompt)
+        
+        print("Kết quả so sánh:", compare_result)
+
+        return jsonify(compare_result)
+
+    except FileNotFoundError:
+        return jsonify({'error': 'Không tìm thấy file prompt'}), 500
+    except Exception as e:
+        print(f"Lỗi trong process_answer: {str(e)}")
+        return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu trả lời'}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

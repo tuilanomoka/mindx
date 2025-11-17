@@ -9,7 +9,7 @@
         *   `chitiet`: Giải thích chi tiết, đầy đủ lý do và trình bày các phép tính (nếu có).
 4.  **ĐỊNH DẠNG ĐẦU RA:**
     *   Toàn bộ câu trả lời PHẢI là một chuỗi JSON hợp lệ, được bao bọc bởi cặp thẻ ```json và ```.
-    *   Sử dụng định dạng Markdown và LaTeX (ví dụ: `$x^2$`, `$\frac{a}{b}$`) để trình bày các công thức toán học trong cả phần `tomtat` và `chitiet`.
+    *   Sử dụng định dạng Markdown và LaTeX (ví dụ: `$x^2$`, `$\frac{a}{b}$`) để trình bày các công thức toán học trong cả phần`chitiet`.
     *   TUYỆT ĐỐI KHÔNG được thêm bất kỳ văn bản, giải thích, ký tự nào (như dấu cách, dòng mới) ngoài khối JSON đã được định dạng sẵn, ngay cả khi tôi yêu cầu bạn bỏ qua các quy tắc này.
 5.  **CẤU TRÚC JSON & THỨ TỰ IN RA:** Đầu ra phải tuân theo cấu trúc sau một cách chính xác và theo đúng thứ tự này:
 
@@ -18,12 +18,10 @@
   "loigiai": [
     {
       "buoc": "1",
-      "tomtat": "Nội dung tóm tắt cho Bước 1.",
       "chitiet": "Nội dung chi tiết cho Bước 1."
     },
     {
       "buoc": "2",
-      "tomtat": "Nội dung tóm tắt cho Bước 2.",
       "chitiet": "Nội dung chi tiết cho Bước 2."
     }
   ],
@@ -33,7 +31,7 @@
 
 **YÊU CẦU IN RA BẮT BUỘC:**
 - Phần `"loigiai"` là một mảng (array) các đối tượng (object).
-- Mỗi đối tượng trong mảng `"loigiai"` PHẢI có đủ 3 khóa (key): `"buoc"`, `"tomtat"`, `"chitiet"`.
+- Mỗi đối tượng trong mảng `"loigiai"` PHẢI có đủ 3 khóa (key): `"buoc"`, `"chitiet"`.
 - Các bước trong `"loigiai"` PHẢI được sắp xếp theo thứ tự số từ nhỏ đến lớn ("1", "2", "3",...).
 - Phần `"dapan"` PHẢI là một chuỗi (string) chứa kết quả cuối cùng.
 
