@@ -3,6 +3,7 @@ from utilities.database import Database
 from utilities.gemini import Gemini
 import os
 from functools import wraps
+import time
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -182,6 +183,29 @@ def process_answer():
     except Exception as e:
         app.logger.error(f"Error processing answer: {str(e)}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu trả lời'}), 500
+@app.route('/api/new_session_id', methods=['POST'])
+def new_session_id():
+    # new session id for practice problem
+    if 'username' not in session:
+        return jsonify({'success':False,'grade':0,'comment':'Not logged in', 'id':''}), 403
+    epoch_time = int(time.time())
+    if "score_"+str(epoch_time) in session:
+        return jsonify({'success':False,'grade':0,'comment':'Already exists', 'id':''}), 409
+    session["score_"+str(epoch_time)] = 100
+    return jsonify({'success':True,'grade':100,'comment':'','id':str(epoch_time)}), 200
+
+@app.route('/api/update_temporary_score', methods=['POST'])
+def update_temporary_score():
+    if 'username' not in session:
+        return jsonify({'success':False,'grade':0,'comment':'Not logged in', 'id':''})
+    data = request.get_json()
+    change_in_score = data.get('change','0').strip()
+    session_id = data.get('id','').strip()
+    if "score_"+session_id not in session:
+        return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
+    session["score_"+session_id] = int(session["score_"+session_id]) - int(change_in_score)
+    return jsonify({'success':True,'grade':session["score_"+session_id],'comment':'', 'id':session_id}), 200
+
 
 @app.route('/api/rankings')
 @login_required

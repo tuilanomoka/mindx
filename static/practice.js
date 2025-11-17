@@ -5,7 +5,34 @@ function showAlert(message, type = 'error') {
     console.log(`${type.toUpperCase()}: ${message}`);
     alert(message);
 }
-
+async function newSession()
+{
+    try {
+        const response = await fetch('/api/new_session_id', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        if(!response.ok)
+        {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if(!data.success)
+        {
+            showAlert('Có lỗi xảy ra: ' + data.comment);
+        }else {
+            window.score_session_id = data.id;
+            document.getElementById("grade").innerHTML = "Số điểm hiện tại của bạn: " + data.grade;
+        }
+    } catch (error) {
+        
+    }
+}
+function processPoint(changes)
+{
+}
 async function submitMathQuestion() {
     const lop = document.getElementById('lop').value;
     const question = document.getElementById('question').value;
@@ -42,6 +69,8 @@ async function submitMathQuestion() {
             processAndDisplayData(data);
             questionDiv.classList.add('hidden');
             hiddenSection.classList.remove('hidden');
+            // process point
+            newSession();
         }
     } catch (error) {
         console.error('Error:', error);
