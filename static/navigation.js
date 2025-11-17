@@ -18,6 +18,10 @@ function navigateTopractice() {
     window.location.href = '/practice';
 }
 
+function navigateToRank() {
+    window.location.href = '/rank';
+}
+
 function navigateToHome() {
     window.location.href = '/home';
 }

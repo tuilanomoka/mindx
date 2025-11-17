@@ -76,6 +76,11 @@ def home_page():
 def practice_page():
     return render_template('practice.html', username=get_username())
 
+@app.route('/rank')
+@login_required
+def rank_page():
+    return render_template('rank.html', username=get_username())
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('resources/icons', 'favicon.ico')
@@ -178,5 +183,27 @@ def process_answer():
         app.logger.error(f"Error processing answer: {str(e)}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu trả lời'}), 500
 
+@app.route('/api/rankings')
+@login_required
+def get_rankings():
+    """API lấy dữ liệu xếp hạng"""
+    try:
+        rankings = db.get_rankings(limit=50)
+        
+        # Format dữ liệu ranking
+        rank_data = []
+        for rank, user_data in enumerate(rankings, 1):
+            rank_data.append({
+                'rank': rank,
+                'username': user_data['username'],
+                'totalpoint': user_data['totalpoint']
+            })
+        
+        return jsonify({'success': True, 'rankings': rank_data})
+    
+    except Exception as e:
+        app.logger.error(f"Error getting rankings: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy dữ liệu ranking'}), 500
+    
 if __name__ == '__main__':
     app.run(debug=True)

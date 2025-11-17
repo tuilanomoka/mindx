@@ -11,6 +11,7 @@ class Database:
     def _get_connection(self):
         """Context manager để tự động quản lý kết nối database"""
         conn = sqlite3.connect(self.db_name)
+        conn.row_factory = sqlite3.Row  # Thêm dòng này để trả về dict-like object
         try:
             yield conn
         finally:
@@ -20,22 +21,50 @@ class Database:
         """Khởi tạo database và bảng users"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
+            
+            # Kiểm tra xem bảng users đã tồn tại chưa
             cursor.execute('''
-                CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT UNIQUE NOT NULL,
-                    password TEXT NOT NULL,
-                    item1 BOOLEAN DEFAULT FALSE,
-                    item2 BOOLEAN DEFAULT FALSE,
-                    item3 BOOLEAN DEFAULT FALSE,
-                    item4 BOOLEAN DEFAULT FALSE,
-                    item5 BOOLEAN DEFAULT FALSE,
-                    selecteditem TEXT DEFAULT NULL,
-                    totalpoint INTEGER DEFAULT 0,
-                    currentpoint INTEGER DEFAULT 0
-                )
+                SELECT name FROM sqlite_master 
+                WHERE type='table' AND name='users'
             ''')
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                # Nếu bảng đã tồn tại, kiểm tra và thêm cột nếu thiếu
+                self._migrate_database(cursor)
+            else:
+                # Nếu bảng chưa tồn tại, tạo mới
+                cursor.execute('''
+                    CREATE TABLE users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        password TEXT NOT NULL,
+                        item1 BOOLEAN DEFAULT FALSE,
+                        item2 BOOLEAN DEFAULT FALSE,
+                        item3 BOOLEAN DEFAULT FALSE,
+                        item4 BOOLEAN DEFAULT FALSE,
+                        item5 BOOLEAN DEFAULT FALSE,
+                        selecteditem TEXT DEFAULT NULL,
+                        totalpoint INTEGER DEFAULT 0,
+                        currentpoint INTEGER DEFAULT 0
+                    )
+                ''')
+            
             conn.commit()
+    
+    def _migrate_database(self, cursor):
+        """Migrate database schema nếu cần"""
+        # Kiểm tra các cột cần thiết
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        # Thêm cột totalpoint nếu chưa có
+        if 'totalpoint' not in columns:
+            cursor.execute('ALTER TABLE users ADD COLUMN totalpoint INTEGER DEFAULT 0')
+        
+        # Thêm cột currentpoint nếu chưa có
+        if 'currentpoint' not in columns:
+            cursor.execute('ALTER TABLE users ADD COLUMN currentpoint INTEGER DEFAULT 0')
     
     def register_user(self, username: str, password: str) -> bool:
         """Đăng ký user mới"""
@@ -97,12 +126,13 @@ class Database:
         """Cập nhật điểm hiện tại"""
         self._update_field(username, 'currentpoint', current_point)
     
-    def get_user_data(self, username: str) -> Optional[Tuple]:
-        """Lấy toàn bộ dữ liệu của user"""
+    def get_user_data(self, username: str) -> Optional[dict]:
+        """Lấy toàn bộ dữ liệu của user dưới dạng dict"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM users WHERE username = ?', (username,))
-            return cursor.fetchone()
+            row = cursor.fetchone()
+            return dict(row) if row else None
     
     def get_user_field(self, username: str, field: str) -> Any:
         """Lấy giá trị của một field cụ thể"""
@@ -133,21 +163,27 @@ class Database:
     
     def get_user_items(self, username: str) -> dict:
         """Lấy thông tin items của user"""
+        user_data = self.get_user_data(username)
+        if user_data:
+            return {
+                'item1': user_data.get('item1', False),
+                'item2': user_data.get('item2', False),
+                'item3': user_data.get('item3', False),
+                'item4': user_data.get('item4', False),
+                'item5': user_data.get('item5', False),
+                'selecteditem': user_data.get('selecteditem')
+            }
+        return {}
+    
+    def get_rankings(self, limit: int = 50) -> list:
+        """Lấy danh sách xếp hạng"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT item1, item2, item3, item4, item5, selecteditem 
-                FROM users WHERE username = ?
-            ''', (username,))
-            result = cursor.fetchone()
-            
-            if result:
-                return {
-                    'item1': result[0],
-                    'item2': result[1],
-                    'item3': result[2],
-                    'item4': result[3],
-                    'item5': result[4],
-                    'selecteditem': result[5]
-                }
-            return {}
+                SELECT username, totalpoint 
+                FROM users 
+                ORDER BY totalpoint DESC, username ASC
+                LIMIT ?
+            ''', (limit,))
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]

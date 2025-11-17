@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block linkcss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='rank.css') }}">
+{% endblock %}
+{% block content %}
+<div class="rank-container">
+    <h1>Bảng Xếp Hạng</h1>
+    <div class="rank-header">
+        <span>Top</span>
+        <span>Tên người dùng</span>
+        <span>Điểm tổng</span>
+    </div>
+    <div class="rank-list" id="rankList">
+        <!-- Dữ liệu ranking sẽ được load bằng JavaScript -->
+        <div class="loading">Đang tải dữ liệu...</div>
+    </div>
+</div>
+{% endblock %}
+{% block linkjs %}
+<script src="{{ url_for('static', filename='rank.js') }}"></script>
+{% endblock %}
