@@ -19,7 +19,9 @@ class Database:
                 item3 BOOLEAN DEFAULT FALSE,
                 item4 BOOLEAN DEFAULT FALSE,
                 item5 BOOLEAN DEFAULT FALSE,
-                selecteditem TEXT DEFAULT NULL
+                selecteditem TEXT DEFAULT NULL,
+                totalpoint INTEGER DEFAULT 0,
+                currentpoint INTEGER DEFAULT 0
             )
         ''')
         conn.commit()
@@ -76,6 +78,24 @@ class Database:
         cursor = conn.cursor()
         cursor.execute('UPDATE users SET selecteditem = ? WHERE username = ?', 
                       (selected_item, username))
+        conn.commit()
+        conn.close()
+    
+    def update_total_point(self, username, total_point):
+        """Cập nhật tổng điểm cho user"""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET totalpoint = ? WHERE username = ?', 
+                      (total_point, username))
+        conn.commit()
+        conn.close()
+    
+    def update_current_point(self, username, current_point):
+        """Cập nhật điểm hiện tại cho user"""
+        conn = sqlite3.connect(self.db_name)
+        cursor = conn.cursor()
+        cursor.execute('UPDATE users SET currentpoint = ? WHERE username = ?', 
+                      (current_point, username))
         conn.commit()
         conn.close()
     
