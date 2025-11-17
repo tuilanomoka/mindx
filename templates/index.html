@@ -6,26 +6,24 @@
 <div class="welcome-container">
     <div class="glow-wrapper">
         <div class="welcome-card">
-            <div class="card-header">
+            <div class="welcome-header">
                 <h1>MindX</h1>
-                <p>Học toán cùng trợ lý AI</p>
+                <p class="tagline">Nền tảng học tập tư duy sử dụng AI</p>
             </div>
             
-            <div class="info-grid">
-                <div class="info-box">
-                    <h3>📚 Chế độ học tập</h3>
-                    <p>...</p>
-                </div>
-                <div class="info-box">
-                    <h3>🎯 Chế độ rèn luyện</h3>
-                    <p>...</p>
-                </div>
+            <div class="intro-box">
+                <div class="intro-icon">🎓</div>
+                <h3>Chào mừng bạn!</h3>
+                <p class="intro-text">MindX là nền tảng học tập tư duy tiên tiến, kết hợp sức mạnh của trí tuệ nhân tạo để giúp bạn nắm vững kiến thức toán học. Với hai chế độ học tập linh hoạt: <strong>Chế độ học tập</strong> để hiểu sâu từng bài, và <strong>Chế độ rèn luyện</strong> để nâng cao kỹ năng giải toán. Hãy bắt đầu hành trình học tập của bạn ngay hôm nay!</p>
             </div>
             
-            <button class="start-button" onclick="navigateToLogin()">Đăng nhập để bắt đầu</button>
+            <div class="auth-buttons-group">
+                <button class="start-button" onclick="window.location.href='/login'">Đăng nhập</button>
+            </div>
+            <div class="divider">hoặc</div>
             
-            <div class="footer-text">
-                Chưa có tài khoản? <a href="#" onclick="navigateToRegister(); return false;">Đăng ký ngay</a>
+            <div class="form-footer" style="margin-top: 24px;">
+                Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
             </div>
         </div>
     </div>
