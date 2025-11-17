@@ -101,7 +101,7 @@ function processAndDisplayData(data) {
                             break;
                     }
                     if (window.MathJax) {
-                        MathJax.typesetPromise([this]).catch(console.error);
+                        MathJax.typesetPromise([this]).catch(console.error);    
                     }
                 });
             });
