@@ -1,14 +1,20 @@
+// Error handling function
+function showAlert(message, type = 'error') {
+    const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
+    // Frontend will handle UI implementation
+    console.log(`${type.toUpperCase()}: ${message}`);
+    alert(message);
+}
+
 async function submitMathQuestion() {
     const lop = document.getElementById('lop').value;
     const question = document.getElementById('question').value;
     const submitBtn = document.getElementById('submitBtn');
     const hiddenSection = document.getElementById('hiddenSection');
     const questionDiv = document.getElementById('question_div');
-    const problemDiv = document.getElementById('problem');
-    const solveDiv = document.getElementById('solve');
 
     if (!lop || !question) {
-        alert('Vui lòng nhập đầy đủ lớp và câu hỏi!');
+        showAlert('Vui lòng nhập đầy đủ lớp và câu hỏi!');
         return;
     }
     
@@ -21,10 +27,7 @@ async function submitMathQuestion() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                lop: lop,
-                question: question
-            })
+            body: JSON.stringify({ lop, question })
         });
         
         if (!response.ok) {
@@ -34,17 +37,15 @@ async function submitMathQuestion() {
         const data = await response.json();
         
         if (data.error) {
-            console.error('Server error:', data.error);
-            alert('Có lỗi xảy ra: ' + data.error);
+            showAlert('Có lỗi xảy ra: ' + data.error);
         } else {
             processAndDisplayData(data);
-            
             questionDiv.classList.add('hidden');
             hiddenSection.classList.remove('hidden');
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('Có lỗi kết nối xảy ra. Vui lòng thử lại!');
+        showAlert('Có lỗi kết nối xảy ra. Vui lòng thử lại!');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Gửi câu hỏi';
@@ -54,9 +55,11 @@ async function submitMathQuestion() {
 function processAndDisplayData(data) {
     const problemDiv = document.getElementById('problem');
     const solveDiv = document.getElementById('solve');
+    
     problemDiv.innerHTML = '';
     solveDiv.innerHTML = '';
     
+    // Display problem
     const mathField = document.getElementById('question');
     const questionContent = mathField ? mathField.getValue() : document.getElementById('question').value;
     
@@ -68,26 +71,24 @@ function processAndDisplayData(data) {
     
     if (!questionData) {
         solveDiv.innerHTML = '<p>Không có dữ liệu giải bài tập.</p>';
-        if (window.MathJax) {
-            MathJax.typesetPromise([problemDiv, solveDiv]).catch(console.error);
-        }
+        renderMathJax([problemDiv, solveDiv]);
         return;
     }
     
+    // Display solution steps
     if (questionData.loigiai && Array.isArray(questionData.loigiai)) {
         const stepsHTML = questionData.loigiai.map((step, index) => {
             const stepNumber = step.buoc || index + 1;
             const stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
             
             return `
-                <div id="step-${index + 1}" class="step" style="margin-bottom: 15px;">
+                <div id="step-${index + 1}" class="step">
                     <a href="javascript:void(0);" 
                        class="step-link" 
-                       data-step="${index}"
-                       style="cursor: pointer; text-decoration: underline; margin-bottom: 10px; display: block;">
+                       data-step="${index}">
                         Bước ${stepNumber}
                     </a>
-                    <div class="step-content" style="display: none; padding: 10px; background-color: #f0f0f0; border-radius: 5px; margin-top: 5px;">
+                    <div class="step-content hidden">
                         ${stepDetail}
                     </div>
                 </div>
@@ -96,60 +97,43 @@ function processAndDisplayData(data) {
         
         solveDiv.innerHTML = stepsHTML;
         
-        setTimeout(() => {
-            document.querySelectorAll('.step-link').forEach(link => {
-                link.addEventListener('click', function() {
-                    const stepIndex = parseInt(this.dataset.step);
-                    const stepContent = this.nextElementSibling;
-                    
-                    stepContent.style.display = 'block';
-                    this.style.display = 'none';
-                    
-                    if (window.MathJax) {
-                        MathJax.typesetPromise([stepContent]).catch(console.error);
-                    }
-                });
+        // Add event listeners for step links
+        document.querySelectorAll('.step-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const stepContent = this.nextElementSibling;
+                stepContent.classList.remove('hidden');
+                this.classList.add('hidden');
+                renderMathJax([stepContent]);
             });
-        }, 0);
+        });
     } else {
-        solveDiv.innerHTML += '<p>Không có lời giải chi tiết.</p>';
+        solveDiv.innerHTML = '<p>Không có lời giải chi tiết.</p>';
     }
     
+    // Display final answer
     if (questionData.dapan) {
         const answerHTML = `
-            <div class="answer-section" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <div class="answer-section">
                 <a href="javascript:void(0);" 
-                   id="final-answer-link"
-                   style="cursor: pointer; text-decoration: underline; display: block; margin-bottom: 10px;">
-                    <h3 style="margin: 0;">Xem đáp án cuối cùng</h3>
+                   id="final-answer-link">
+                    <h3>Xem đáp án cuối cùng</h3>
                 </a>
-                <div id="final-answer-content" style="display: none;">
+                <div id="final-answer-content" class="hidden">
                     ${questionData.dapan}
                 </div>
             </div>
         `;
         solveDiv.innerHTML += answerHTML;
         
-        setTimeout(() => {
-            const finalAnswerLink = document.getElementById('final-answer-link');
+        document.getElementById('final-answer-link').addEventListener('click', function() {
             const finalAnswerContent = document.getElementById('final-answer-content');
-            
-            if (finalAnswerLink && finalAnswerContent) {
-                finalAnswerLink.addEventListener('click', function() {
-                    finalAnswerContent.style.display = 'block';
-                    this.style.display = 'none';
-                    
-                    if (window.MathJax) {
-                        MathJax.typesetPromise([finalAnswerContent]).catch(console.error);
-                    }
-                });
-            }
-        }, 0);
+            finalAnswerContent.classList.remove('hidden');
+            this.classList.add('hidden');
+            renderMathJax([finalAnswerContent]);
+        });
     }
     
-    if (window.MathJax) {
-        MathJax.typesetPromise([problemDiv, solveDiv]).catch(console.error);
-    }
+    renderMathJax([problemDiv, solveDiv]);
 }
 
 async function submitAnswer() {
@@ -161,7 +145,7 @@ async function submitAnswer() {
     const question = questionField ? questionField.getValue() : document.getElementById('question').value;
     
     if (!userAnswer) {
-        alert('Vui lòng nhập câu trả lời!');
+        showAlert('Vui lòng nhập câu trả lời!');
         return;
     }
     
@@ -176,8 +160,8 @@ async function submitAnswer() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                lop: lop,
-                question: question,
+                lop,
+                question,
                 user_answer: userAnswer
             })
         });
@@ -187,12 +171,11 @@ async function submitAnswer() {
         }
         
         const result = await response.json();
-        
         showAnswerResult(result);
         
     } catch (error) {
         console.error('Error:', error);
-        alert('Có lỗi kết nối xảy ra. Vui lòng thử lại!');
+        showAlert('Có lỗi kết nối xảy ra. Vui lòng thử lại!');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
@@ -206,19 +189,10 @@ function showAnswerResult(result) {
         resultDiv = document.createElement('div');
         resultDiv.id = 'answer-result';
         resultDiv.className = 'result';
-        resultDiv.style.marginTop = '20px';
-        resultDiv.style.padding = '15px';
-        resultDiv.style.borderRadius = '5px';
-        
-        const hiddenSection = document.getElementById('hiddenSection');
-        hiddenSection.appendChild(resultDiv);
+        document.getElementById('hiddenSection').appendChild(resultDiv);
     }
-    let resultData;
-    if (Array.isArray(result) && result.length > 0) {
-        resultData = result[0];
-    } else {
-        resultData = result;
-    }
+    
+    const resultData = Array.isArray(result) ? result[0] : result;
     const acstatus = resultData?.acstatus;
     const explain = resultData?.explain || 'Không có giải thích';
     
@@ -227,7 +201,14 @@ function showAnswerResult(result) {
         <p>${statusText}</p>
         <p>${explain}</p>
     `;
+    
     resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderMathJax(elements) {
+    if (window.MathJax) {
+        MathJax.typesetPromise(elements).catch(console.error);
+    }
 }
 
 function navigateToHome() {
