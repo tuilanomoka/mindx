@@ -36,7 +36,7 @@ class Gemini:
         content = context
         client = genai.Client(api_key=GEMINI_API_KEY)
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=content,
         )
         print(response.text)
