@@ -4,6 +4,7 @@ from utilities.gemini import Gemini
 import os
 from functools import wraps
 import time
+import json
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -166,6 +167,7 @@ def process_answer():
     lop = data.get('lop', '').strip()
     question = data.get('question', '').strip()
     user_answer = data.get('user_answer', '').strip()
+    question_id = data.get('id','').strip()
     
     if not question or not user_answer:
         return jsonify({'error': 'Thiếu thông tin câu hỏi hoặc câu trả lời'}), 400
@@ -179,6 +181,24 @@ def process_answer():
     try:
         compare_result = Gemini.generate_question(prompt)
         app.logger.info(f"Comparison result for question: {question}")
+        try:
+            print(compare_result)
+            json_data = compare_result[0]
+            if json_data.get('acstatus',"false") == "true":
+                # add point
+                if "score_"+str(question_id) in session:
+                    EarnedPoint = session[ "score_"+str(question_id)]
+                    u_data = db.get_user_data(session['username'])
+                    if u_data is not None:
+                        total_point = u_data.get('totalpoint',0)+EarnedPoint
+                        current_point = u_data.get('currentpoint',0)+EarnedPoint
+                        db.update_points(session['username'],total_point,current_point)
+                        print("Đã cập nhập điểm:",total_point,'/',current_point)
+        except Exception as e:
+            print(e)
+            print("Sai câu trả lời. Không cộng điểm cho em bé")
+
+        session["score_"+str(question_id)] = 0
         return jsonify(compare_result)
     except Exception as e:
         app.logger.error(f"Error processing answer: {str(e)}")
@@ -203,7 +223,21 @@ def update_temporary_score():
     session_id = data.get('id','').strip()
     if "score_"+session_id not in session:
         return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
-    session["score_"+session_id] = int(session["score_"+session_id]) - int(change_in_score)
+    
+    newScore = int(session["score_"+session_id]) + int(change_in_score)
+    if newScore < 0: newScore = 0
+    session["score_"+session_id] = newScore
+    return jsonify({'success':True,'grade':session["score_"+session_id],'comment':'', 'id':session_id}), 200
+
+@app.route('/api/zero_out_temporary_score', methods=['POST'])
+def zero_out_temporary_score():
+    if 'username' not in session:
+        return jsonify({'success':False,'grade':0,'comment':'Not logged in', 'id':''})
+    data = request.get_json()
+    session_id = data.get('id','').strip()
+    if "score_"+session_id not in session:
+        return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
+    session["score_"+session_id] = 0
     return jsonify({'success':True,'grade':session["score_"+session_id],'comment':'', 'id':session_id}), 200
 
 
