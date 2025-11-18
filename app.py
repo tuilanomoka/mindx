@@ -14,6 +14,7 @@ db = Database()
 PROMPT_DIR = 'resources/prompts'
 QUESTION_PROMPT_FILE = 'question.txt'
 COMPARE_PROMPT_FILE = 'compare.txt'
+SHOP_ITEMS_FILE = 'static/shop.json'
 
 # Decorators
 def login_required(f):
@@ -263,14 +264,150 @@ def get_rankings():
         app.logger.error(f"Error getting rankings: {str(e)}")
         return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy dữ liệu ranking'}), 500
     
-@app.route("/api/shop")
-def shop():
-    return 0 #TODO
-
-@app.route("/api/inv")
+@app.route('/inventory')
 @login_required
-def shop():
-    return 0 #TODO
+def inventory_page():
+    return render_template('inventory.html', username=get_username())
+
+@app.route('/shop')
+@login_required
+def shop_page():
+    return render_template('shop.html', username=get_username())
+@app.route('/api/shop/items')
+@login_required
+def get_shop_items():
+    """API lấy danh sách items trong shop"""
+    try:
+        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+            shop_data = json.load(file)
+            return jsonify({'success': True, 'items': shop_data['items']})
+    except Exception as e:
+        app.logger.error(f"Error loading shop items: {str(e)}")
+        return jsonify({'success': False, 'error': 'Không thể tải danh sách items'}), 500
+
+@app.route('/api/shop/buy', methods=['POST'])
+@login_required
+def buy_item():
+    """API mua item từ shop"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
+    
+    item_id = data.get('item_id', '').strip()
+    
+    if not item_id:
+        return jsonify({'success': False, 'message': 'Thiếu thông tin item'}), 400
+    
+    try:
+        # Lấy thông tin user
+        user_data = db.get_user_data(session['username'])
+        if not user_data:
+            return jsonify({'success': False, 'message': 'Không tìm thấy thông tin user'}), 404
+        
+        # Lấy thông tin item từ shop
+        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+            shop_data = json.load(file)
+        
+        item_info = None
+        for item in shop_data['items']:
+            if item['id'] == item_id:
+                item_info = item
+                break
+        
+        if not item_info:
+            return jsonify({'success': False, 'message': 'Item không tồn tại'}), 404
+        
+        # Kiểm tra user đã sở hữu item chưa
+        if user_data.get(item_id, False):
+            return jsonify({'success': False, 'message': 'Bạn đã sở hữu item này'}), 400
+        
+        # Kiểm tra đủ điểm không
+        current_points = user_data.get('currentpoint', 0)
+        item_price = item_info['price']
+        
+        if current_points < item_price:
+            return jsonify({'success': False, 'message': 'Không đủ điểm để mua'}), 400
+        
+        # Thực hiện mua item
+        new_current_points = current_points - item_price
+        
+        # Cập nhật database
+        db.update_field(session['username'], item_id, True)
+        db.update_current_point(session['username'], new_current_points)
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Mua {item_info["name"]} thành công!',
+            'new_balance': new_current_points
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error buying item: {str(e)}")
+        return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi mua item'}), 500
+
+@app.route('/api/inventory')
+@login_required
+def get_inventory():
+    """API lấy inventory của user"""
+    try:
+        user_data = db.get_user_data(session['username'])
+        if not user_data:
+            return jsonify({'success': False, 'error': 'Không tìm thấy user'}), 404
+        
+        # Lấy danh sách items từ shop để có thông tin đầy đủ
+        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+            shop_data = json.load(file)
+        
+        inventory = []
+        for item in shop_data['items']:
+            item_id = item['id']
+            if user_data.get(item_id, False):
+                inventory.append({
+                    'id': item_id,
+                    'name': item['name'],
+                    'price': item['price'],
+                    'selected': user_data.get('selecteditem') == item_id
+                })
+        
+        return jsonify({
+            'success': True, 
+            'inventory': inventory,
+            'current_points': user_data.get('currentpoint', 0),
+            'total_points': user_data.get('totalpoint', 0)
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error getting inventory: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy inventory'}), 500
+
+@app.route('/api/inventory/select', methods=['POST'])
+@login_required
+def select_item():
+    """API chọn item để sử dụng"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
+    
+    item_id = data.get('item_id', '').strip()
+    
+    if not item_id:
+        return jsonify({'success': False, 'message': 'Thiếu thông tin item'}), 400
+    
+    try:
+        # Kiểm tra user có sở hữu item không
+        user_data = db.get_user_data(session['username'])
+        if not user_data.get(item_id, False):
+            return jsonify({'success': False, 'message': 'Bạn không sở hữu item này'}), 400
+        
+        # Cập nhật selected item
+        db.update_selected_item(session['username'], item_id)
+        
+        return jsonify({'success': True, 'message': 'Đã chọn item thành công!'})
+        
+    except Exception as e:
+        app.logger.error(f"Error selecting item: {str(e)}")
+        return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi chọn item'}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

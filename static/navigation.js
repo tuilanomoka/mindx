@@ -29,6 +29,7 @@ function navigateToHome() {
 function navigateToShop() {
     window.location.href = '/shop';
 }
+
 function navigateToInventory() {
     window.location.href = '/inventory';
 }

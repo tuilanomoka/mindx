@@ -1,11 +1,24 @@
 {% extends "base.html" %}
 {% block linkcss %}
-<link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='shop.css') }}">
 {% endblock %}
 {% block content %}
-    <div>
-        <h1>Tất cả item mà chúng tôi có hiện tại:</h1>
+<div class="shop-container">
+    <div class="shop-header">
+        <h1>🛒 Cửa Hàng Danh Hiệu</h1>
+        <div class="user-balance">
+            <span>Điểm hiện tại: </span>
+            <strong id="current-points">0</strong>
+        </div>
     </div>
+    
+    <div class="items-grid" id="items-grid">
+        <!-- Items sẽ được load bằng JavaScript -->
+    </div>
+    
+    <div class="loading" id="loading">Đang tải...</div>
+</div>
 {% endblock %}
 {% block linkjs %}
+<script src="{{ url_for('static', filename='shop.js') }}"></script>
 {% endblock %}

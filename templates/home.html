@@ -1,17 +1,79 @@
 {% extends "base.html" %}
 {% block linkcss %}
-<link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 {% endblock %}
 {% block content %}
-    <div>
-        <button onclick="navigateTopractice();">
-            Luyện tập
+<div class="home-container">
+    <!-- User Info Section -->
+    <div class="user-info-card">
+        <div class="user-header">
+            <h2>👋 Chào mừng, {{ username }}!</h2>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Tổng điểm:</span>
+                    <span class="stat-value" id="total-points">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Điểm hiện tại:</span>
+                    <span class="stat-value" id="current-points">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Selected Item Display -->
+        <div class="selected-item-section">
+            <h3>🎯 Danh hiệu đang sử dụng</h3>
+            <div class="selected-item" id="selected-item-display">
+                <div class="loading">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="navigation-grid">
+        <button class="nav-button primary" onclick="navigateTopractice()">
+            <div class="button-icon">📚</div>
+            <div class="button-text">
+                <div class="button-title">Luyện tập</div>
+                <div class="button-desc">Rèn luyện kỹ năng toán học</div>
+            </div>
         </button>
-        <button onclick="navigateToRank();">
-            Rank
+        
+        <button class="nav-button secondary" onclick="navigateToRank()">
+            <div class="button-icon">🏆</div>
+            <div class="button-text">
+                <div class="button-title">Bảng xếp hạng</div>
+                <div class="button-desc">Xem vị trí của bạn</div>
+            </div>
         </button>
-        <button onclick="navigateToLogout();">
-            Đăng xuất
+        
+        <button class="nav-button shop" onclick="navigateToShop()">
+            <div class="button-icon">🛒</div>
+            <div class="button-text">
+                <div class="button-title">Cửa hàng</div>
+                <div class="button-desc">Mua danh hiệu mới</div>
+            </div>
+        </button>
+        
+        <button class="nav-button inventory" onclick="navigateToInventory()">
+            <div class="button-icon">🎒</div>
+            <div class="button-text">
+                <div class="button-title">Kho đồ</div>
+                <div class="button-desc">Quản lý danh hiệu</div>
+            </div>
+        </button>
+        
+        <button class="nav-button logout" onclick="navigateToLogout()">
+            <div class="button-icon">🚪</div>
+            <div class="button-text">
+                <div class="button-title">Đăng xuất</div>
+                <div class="button-desc">Thoát khỏi tài khoản</div>
+            </div>
         </button>
     </div>
+</div>
+{% endblock %}
+
+{% block linkjs %}
+<script src="{{ url_for('static', filename='home.js') }}"></script>
 {% endblock %}

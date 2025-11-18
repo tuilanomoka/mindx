@@ -97,7 +97,7 @@ class Database:
             cursor.execute('SELECT 1 FROM users WHERE username = ?', (username,))
             return cursor.fetchone() is not None
     
-    def _update_field(self, username: str, field: str, value: Any):
+    def update_field(self, username: str, field: str, value: Any):
         """Phương thức chung để cập nhật các field"""
         with self._get_connection() as conn:
             cursor = conn.cursor()

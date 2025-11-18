@@ -1,0 +1,241 @@
+/* Home Page Styles */
+.home-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.user-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.user-header h2 {
+    margin: 0 0 20px 0;
+    font-size: 1.8em;
+    text-align: center;
+}
+
+.user-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 25px;
+}
+
+.stat-item {
+    text-align: center;
+    background: rgba(255,255,255,0.2);
+    padding: 15px 25px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.selected-item-section h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    opacity: 0.9;
+}
+
+.selected-item {
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.active-item {
+    text-align: center;
+}
+
+.item-badge {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    background: rgba(255,255,255,0.2);
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: inline-block;
+}
+
+.item-description {
+    opacity: 0.8;
+    font-size: 0.9em;
+}
+
+.no-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+}
+
+.no-item-icon {
+    font-size: 3em;
+}
+
+.no-item-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.no-item-desc {
+    opacity: 0.8;
+    margin-bottom: 15px;
+}
+
+.goto-shop-btn {
+    background: rgba(255,255,255,0.3);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.5);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.goto-shop-btn:hover {
+    background: rgba(255,255,255,0.4);
+    transform: translateY(-2px);
+}
+
+/* Navigation Grid */
+.navigation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.nav-button {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 25px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.nav-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.nav-button.primary {
+    border-color: #007bff;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.nav-button.secondary {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+}
+
+.nav-button.shop {
+    border-color: #ffc107;
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+    color: white;
+}
+
+.nav-button.inventory {
+    border-color: #6f42c1;
+    background: linear-gradient(135deg, #6f42c1, #5a2d91);
+    color: white;
+}
+
+.nav-button.logout {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.button-icon {
+    font-size: 2.5em;
+    flex-shrink: 0;
+}
+
+.button-text {
+    flex: 1;
+}
+
+.button-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.button-desc {
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+/* Loading and Error States */
+.loading {
+    text-align: center;
+    padding: 20px;
+    opacity: 0.7;
+}
+
+.error {
+    text-align: center;
+    color: #ff6b6b;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .home-container {
+        padding: 15px;
+    }
+    
+    .user-info-card {
+        padding: 20px;
+    }
+    
+    .user-stats {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .navigation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-button {
+        padding: 20px 15px;
+    }
+    
+    .button-icon {
+        font-size: 2em;
+    }
+}
