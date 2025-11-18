@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block linkcss %}
+<link rel="stylesheet" href="{{ url_for('static', filename='welcome.css') }}">
+{% endblock %}
+{% block content %}
+    <div>
+        <h1>Tất cả item mà bạn đang sở hữu:</h1>
+    </div>
+{% endblock %}
+{% block linkjs %}
+{% endblock %}

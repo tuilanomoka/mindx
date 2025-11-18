@@ -25,3 +25,10 @@ function navigateToRank() {
 function navigateToHome() {
     window.location.href = '/home';
 }
+
+function navigateToShop() {
+    window.location.href = '/shop';
+}
+function navigateToInventory() {
+    window.location.href = '/inventory';
+}

@@ -263,5 +263,14 @@ def get_rankings():
         app.logger.error(f"Error getting rankings: {str(e)}")
         return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy dữ liệu ranking'}), 500
     
+@app.route("/api/shop")
+def shop():
+    return 0 #TODO
+
+@app.route("/api/inv")
+@login_required
+def shop():
+    return 0 #TODO
+
 if __name__ == '__main__':
     app.run(debug=True)
