@@ -7,7 +7,7 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     {% block linkcss %}
     {% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
 <body>
     {% block content %}
@@ -18,7 +18,7 @@
 </body>
     {% block linkjs %}
     {% endblock %}
-    <script src="{{ url_for('static', filename='navigation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
     <script>
         MathJax = {

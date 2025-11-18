@@ -14,7 +14,7 @@ db = Database()
 PROMPT_DIR = 'resources/prompts'
 QUESTION_PROMPT_FILE = 'question.txt'
 COMPARE_PROMPT_FILE = 'compare.txt'
-SHOP_ITEMS_FILE = 'static/shop.json'
+SHOP_ITEMS_FILE = 'static/json/shop.json'
 
 # Decorators
 def login_required(f):

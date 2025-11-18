@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block linkcss %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 {% endblock %}
 {% block content %}
 <div class="auth-container">
@@ -44,5 +44,5 @@
 </div>
 {% endblock %}
 {% block linkjs %}
-        <script src="{{ url_for('static', filename='auth.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}
