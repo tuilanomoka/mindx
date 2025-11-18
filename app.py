@@ -79,6 +79,11 @@ def home_page():
 def practice_page():
     return render_template('practice.html', username=get_username())
 
+@app.route('/learn')
+@login_required
+def learn_page():
+    return render_template('learn.html', username=get_username())
+
 @app.route('/rank')
 @login_required
 def rank_page():
@@ -153,7 +158,12 @@ def process_question():
     
     try:
         questions_json = Gemini.generate_question(content)
-        return jsonify(questions_json)
+        
+        # Extract first JSON object from list
+        if isinstance(questions_json, list) and len(questions_json) > 0:
+            return jsonify(questions_json[0])
+        else:
+            return jsonify({'error': 'Không thể parse dữ liệu từ Gemini'}), 500
     except Exception as e:
         app.logger.error(f"Error generating question: {str(e)}")
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu hỏi'}), 500

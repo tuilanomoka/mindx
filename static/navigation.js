@@ -33,3 +33,7 @@ function navigateToShop() {
 function navigateToInventory() {
     window.location.href = '/inventory';
 }
+
+function navigateToLearn() {
+    window.location.href = '/learn';
+}
