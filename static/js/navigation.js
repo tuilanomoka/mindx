@@ -37,3 +37,7 @@ function navigateToInventory() {
 function navigateToLearn() {
     window.location.href = '/learn';
 }
+
+function navigateToAdmin() {
+    window.location.href = '/admin';
+}

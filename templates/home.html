@@ -73,6 +73,17 @@
             </div>
         </button>
         
+        <!-- Admin Button - Only show for admin users -->
+        {% if username == 'admin' %}
+        <button class="nav-button admin" onclick="navigateToAdmin()">
+            <div class="button-icon">⚙️</div>
+            <div class="button-text">
+                <div class="button-title">Quản trị</div>
+                <div class="button-desc">Trang quản lý hệ thống</div>
+            </div>
+        </button>
+        {% endif %}
+        
         <button class="nav-button logout" onclick="navigateToLogout()">
             <div class="button-icon">🚪</div>
             <div class="button-text">

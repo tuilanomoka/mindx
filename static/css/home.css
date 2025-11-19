@@ -239,3 +239,33 @@
         font-size: 2em;
     }
 }
+
+/* Thêm vào home.css */
+
+.nav-button.admin {
+    border-color: #17a2b8;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+/* Hoặc bạn có thể thêm style đặc biệt để nổi bật nút admin */
+.nav-button.admin {
+    border-color: #ff6b6b;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    position: relative;
+}
+
+.nav-button.admin::after {
+    content: "ADMIN";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ffd700;
+    color: #000;
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    transform: rotate(15deg);
+}
