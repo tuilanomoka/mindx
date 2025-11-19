@@ -156,17 +156,74 @@ def process_question():
     
     content = create_prompt_content(lop, question_data, prompt_template)
     
+    app.logger.info(f"Sending to Gemini: {content}")
+    
     try:
         questions_json = Gemini.generate_question(content)
+        app.logger.info(f"Gemini response type: {type(questions_json)}")
+        app.logger.info(f"Gemini response: {questions_json}")
         
-        # Extract first JSON object from list
-        if isinstance(questions_json, list) and len(questions_json) > 0:
-            return jsonify(questions_json[0])
+        # Validate and process response
+        if not questions_json:
+            app.logger.error("Gemini returned None or empty")
+            return jsonify({
+                'loigiai': [{'buoc': '1', 'chitiet': 'Lỗi: Không có phản hồi từ AI'}],
+                'dapan': 'Lỗi hệ thống'
+            })
+        
+        # Ensure we have a list and get first item
+        if isinstance(questions_json, list):
+            if len(questions_json) == 0:
+                app.logger.error("Gemini returned empty list")
+                return jsonify({
+                    'loigiai': [{'buoc': '1', 'chitiet': 'Không có dữ liệu trả về từ AI'}],
+                    'dapan': 'Lỗi dữ liệu'
+                })
+            result = questions_json[0]
         else:
-            return jsonify({'error': 'Không thể parse dữ liệu từ Gemini'}), 500
+            result = questions_json
+        
+        # Validate result structure
+        if not isinstance(result, dict):
+            app.logger.error(f"Invalid result type: {type(result)}")
+            return jsonify({
+                'loigiai': [{'buoc': '1', 'chitiet': 'Định dạng dữ liệu không hợp lệ'}],
+                'dapan': 'Lỗi định dạng'
+            })
+        
+        # FIXED: Don't overwrite existing data, just ensure structure
+        final_result = result.copy()  # Keep original data
+        
+        # Ensure loigiai exists and is a list
+        if 'loigiai' not in final_result or not isinstance(final_result['loigiai'], list):
+            final_result['loigiai'] = [{'buoc': '1', 'chitiet': 'Không có lời giải chi tiết'}]
+        
+        # Ensure dapan exists
+        if 'dapan' not in final_result:
+            final_result['dapan'] = 'Không có đáp án'
+        
+        # Validate and fix each step
+        for i, step in enumerate(final_result['loigiai']):
+            if not isinstance(step, dict):
+                final_result['loigiai'][i] = {'buoc': str(i+1), 'chitiet': str(step)}
+            else:
+                if 'buoc' not in step:
+                    step['buoc'] = str(i+1)
+                if 'chitiet' not in step:
+                    step['chitiet'] = step.get('tomtat', 'Không có mô tả chi tiết')
+        
+        app.logger.info(f"Final processed result: {final_result}")
+        return jsonify(final_result)
+        
     except Exception as e:
-        app.logger.error(f"Error generating question: {str(e)}")
-        return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu hỏi'}), 500
+        app.logger.error(f"Error in process_question: {str(e)}")
+        import traceback
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        return jsonify({
+            'loigiai': [{'buoc': '1', 'chitiet': f'Lỗi hệ thống: {str(e)}'}],
+            'dapan': 'Lỗi xử lý'
+        }), 500
 
 @app.route('/process-answer', methods=['POST'])
 @login_required
@@ -207,7 +264,7 @@ def process_answer():
                         print("Đã cập nhập điểm:",total_point,'/',current_point)
         except Exception as e:
             print(e)
-            print("Sai câu trả lời. Không cộng điểm cho em bé")
+            print("Sai câu trả lời.")
 
         session["score_"+str(question_id)] = 0
         return jsonify(compare_result)
@@ -216,14 +273,29 @@ def process_answer():
         return jsonify({'error': 'Có lỗi xảy ra khi xử lý câu trả lời'}), 500
 @app.route('/api/new_session_id', methods=['POST'])
 def new_session_id():
-    # new session id for practice problem
+    """Create new session ID for practice problem"""
+    app.logger.info(f"new_session_id endpoint called by user: {session.get('username')}")
+    
     if 'username' not in session:
-        return jsonify({'success':False,'grade':0,'comment':'Not logged in', 'id':''}), 403
+        app.logger.warning("new_session_id: User not logged in")
+        return jsonify({'success': False, 'grade': 0, 'comment': 'Not logged in', 'id': ''}), 403
+    
     epoch_time = int(time.time())
-    if "score_"+str(epoch_time) in session:
-        return jsonify({'success':False,'grade':0,'comment':'Already exists', 'id':''}), 409
-    session["score_"+str(epoch_time)] = 100
-    return jsonify({'success':True,'grade':100,'comment':'','id':str(epoch_time)}), 200
+    session_key = f"score_{epoch_time}"
+    
+    if session_key in session:
+        app.logger.warning(f"new_session_id: Session already exists: {session_key}")
+        return jsonify({'success': False, 'grade': 0, 'comment': 'Already exists', 'id': ''}), 409
+    
+    session[session_key] = 100
+    app.logger.info(f"new_session_id: Created new session: {session_key} for user: {session['username']}")
+    
+    return jsonify({
+        'success': True,
+        'grade': 100,
+        'comment': '',
+        'id': str(epoch_time)
+    }), 200
 
 @app.route('/api/update_temporary_score', methods=['POST'])
 def update_temporary_score():
