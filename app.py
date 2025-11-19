@@ -372,17 +372,23 @@ def get_shop_items():
 def buy_item():
     """API mua item từ shop"""
     data = request.get_json()
+    app.logger.info(f"Buy item request data: {data}")
+    
     if not data:
         return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
     
     item_id = data.get('item_id', '').strip()
+    app.logger.info(f"Item ID: {item_id}")
     
     if not item_id:
         return jsonify({'success': False, 'message': 'Thiếu thông tin item'}), 400
     
     try:
         # Lấy thông tin user
-        user_data = db.get_user_data(session['username'])
+        username = session['username']
+        user_data = db.get_user_data(username)
+        app.logger.info(f"User data: {user_data}")  # Debug toàn bộ user data
+        
         if not user_data:
             return jsonify({'success': False, 'message': 'Không tìm thấy thông tin user'}), 404
         
@@ -399,23 +405,34 @@ def buy_item():
         if not item_info:
             return jsonify({'success': False, 'message': 'Item không tồn tại'}), 404
         
+        app.logger.info(f"Item info: {item_info}")  # Debug item info
+        
         # Kiểm tra user đã sở hữu item chưa
-        if user_data.get(item_id, False):
+        owns_item = user_data.get(item_id, False)
+        app.logger.info(f"User owns {item_id}: {owns_item}")  # Debug trạng thái sở hữu
+        
+        if owns_item:
             return jsonify({'success': False, 'message': 'Bạn đã sở hữu item này'}), 400
         
         # Kiểm tra đủ điểm không
         current_points = user_data.get('currentpoint', 0)
         item_price = item_info['price']
         
+        app.logger.info(f"User points: {current_points}, Item price: {item_price}")  # Debug điểm
+        
         if current_points < item_price:
-            return jsonify({'success': False, 'message': 'Không đủ điểm để mua'}), 400
+            return jsonify({'success': False, 'message': f'Không đủ điểm để mua. Bạn có {current_points} điểm, cần {item_price} điểm'}), 400
         
         # Thực hiện mua item
         new_current_points = current_points - item_price
         
-        # Cập nhật database
-        db.update_field(session['username'], item_id, True)
-        db.update_current_point(session['username'], new_current_points)
+        app.logger.info(f"Updating field {item_id} to True")
+        db.update_field(username, item_id, True)
+        
+        app.logger.info(f"Updating current points to {new_current_points}")
+        db.update_current_point(username, new_current_points)
+        
+        app.logger.info(f"Purchase successful for {username}: {item_info['name']}")
         
         return jsonify({
             'success': True, 
@@ -425,8 +442,10 @@ def buy_item():
         
     except Exception as e:
         app.logger.error(f"Error buying item: {str(e)}")
+        import traceback
+        app.logger.error(f"Traceback: {traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi mua item'}), 500
-
+    
 @app.route('/api/inventory')
 @login_required
 def get_inventory():
@@ -490,6 +509,183 @@ def select_item():
         app.logger.error(f"Error selecting item: {str(e)}")
         return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi chọn item'}), 500
 
+# Thêm vào app.py
+
+# Admin routes
+@app.route('/admin')
+@login_required
+def admin_page():
+    """Trang admin panel"""
+    if not db.is_admin(session['username']):
+        return redirect(url_for('home_page'))
+    return render_template('admin.html', username=get_username())
+
+@app.route('/api/admin/users')
+@login_required
+def admin_get_users():
+    """API lấy danh sách users (chỉ admin)"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    try:
+        users = db.get_all_users()
+        return jsonify({'success': True, 'users': users})
+    except Exception as e:
+        app.logger.error(f"Error getting users: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra'}), 500
+
+@app.route('/api/admin/stats')
+@login_required
+def admin_get_stats():
+    """API lấy thống kê hệ thống (chỉ admin)"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    try:
+        users = db.get_all_users()
+        total_users = len(users)
+        total_points = sum(user.get('totalpoint', 0) for user in users)
+        
+        # Tìm user có điểm cao nhất
+        top_user = max(users, key=lambda x: x.get('totalpoint', 0), default=None)
+        top_user_name = top_user['username'] if top_user else 'Không có'
+        
+        # Top 10 users
+        top_users = sorted(users, key=lambda x: x.get('totalpoint', 0), reverse=True)[:10]
+        
+        return jsonify({
+            'success': True,
+            'total_users': total_users,
+            'total_points': total_points,
+            'top_user': top_user_name,
+            'top_users': top_users
+        })
+    except Exception as e:
+        app.logger.error(f"Error getting stats: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra'}), 500
+
+@app.route('/api/admin/update-user', methods=['POST'])
+@login_required
+def admin_update_user():
+    """API cập nhật thông tin user (chỉ admin)"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
+    
+    username = data.get('username')
+    total_point = data.get('total_point', 0)
+    current_point = data.get('current_point', 0)
+    
+    if not username:
+        return jsonify({'success': False, 'error': 'Thiếu username'}), 400
+    
+    try:
+        if db.update_user_points(username, total_point, current_point):
+            return jsonify({'success': True, 'message': 'Cập nhật thành công'})
+        else:
+            return jsonify({'success': False, 'error': 'Không thể cập nhật'}), 500
+    except Exception as e:
+        app.logger.error(f"Error updating user: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra'}), 500
+
+@app.route('/api/admin/delete-user', methods=['POST'])
+@login_required
+def admin_delete_user():
+    """API xóa user (chỉ admin)"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
+    
+    username = data.get('username')
+    
+    if not username:
+        return jsonify({'success': False, 'error': 'Thiếu username'}), 400
+    
+    if username == 'admin':
+        return jsonify({'success': False, 'error': 'Không thể xóa tài khoản admin'}), 400
+    
+    try:
+        if db.delete_user(username):
+            return jsonify({'success': True, 'message': 'Xóa user thành công'})
+        else:
+            return jsonify({'success': False, 'error': 'Không thể xóa user'}), 500
+    except Exception as e:
+        app.logger.error(f"Error deleting user: {str(e)}")
+        return jsonify({'success': False, 'error': 'Có lỗi xảy ra'}), 500
+
+@app.route('/api/admin/change-password', methods=['POST'])
+@login_required
+def admin_change_own_password():
+    """API đổi mật khẩu của chính admin"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
+    
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
+    
+    if not current_password or not new_password:
+        return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ thông tin'}), 400
+    
+    # Verify current password
+    if not db.login_user(session['username'], current_password):
+        return jsonify({'success': False, 'error': 'Mật khẩu hiện tại không đúng'}), 400
+    
+    # Update password
+    if db.update_user_password(session['username'], new_password):
+        return jsonify({'success': True, 'message': 'Đổi mật khẩu thành công'})
+    else:
+        return jsonify({'success': False, 'error': 'Không thể đổi mật khẩu'}), 500
+
+@app.route('/api/admin/change-user-password', methods=['POST'])
+@login_required
+def admin_change_user_password():
+    """API đổi mật khẩu của user khác (chỉ admin)"""
+    if not db.is_admin(session['username']):
+        return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
+    
+    username = data.get('username')
+    new_password = data.get('new_password')
+    
+    if not username or not new_password:
+        return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ thông tin'}), 400
+    
+    # Update password
+    if db.update_user_password(username, new_password):
+        return jsonify({'success': True, 'message': f'Đổi mật khẩu cho {username} thành công'})
+    else:
+        return jsonify({'success': False, 'error': 'Không thể đổi mật khẩu'}), 500
+
+@app.route('/api/user/points')
+@login_required
+def get_user_points():
+    """API lấy điểm của user"""
+    try:
+        user_data = db.get_user_data(session['username'])
+        if user_data:
+            return jsonify({
+                'success': True,
+                'current_points': user_data.get('currentpoint', 0),
+                'total_points': user_data.get('totalpoint', 0)
+            })
+        else:
+            return jsonify({'success': False, 'error': 'User not found'}), 404
+    except Exception as e:
+        app.logger.error(f"Error getting user points: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
