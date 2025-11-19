@@ -221,14 +221,18 @@ class Database:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                SELECT username, totalpoint 
+                SELECT username, totalpoint, selecteditem 
                 FROM users 
                 ORDER BY totalpoint DESC, username ASC
                 LIMIT ?
             ''', (limit,))
             rows = cursor.fetchall()
+            
+            # Debug: log kết quả query
+            for row in rows:
+                print(f"DB - {row['username']}: selecteditem = {row['selecteditem']}")
+            
             return [dict(row) for row in rows]
-    # Thêm vào class Database trong database.py
 
     def is_admin(self, username: str) -> bool:
         """Kiểm tra user có phải là admin không"""

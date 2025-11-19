@@ -1,6 +1,14 @@
 class RankManager {
     constructor() {
         this.rankList = document.getElementById('rankList');
+        this.titleNames = {
+            'item1': 'Học Sinh Xuất Sắc',
+            'item2': 'Nhà Toán Học Tương Lai', 
+            'item3': 'Thần Đồng Toán Học',
+            'item4': 'Bậc Thầy Giải Toán',
+            'item5': 'Siêu Trí Tuệ Toán Học',
+            'none': 'Chưa có danh hiệu'
+        };
         this.init();
     }
 
@@ -38,11 +46,23 @@ class RankManager {
             <div class="rank-item ${this.getRankClass(item.rank)}">
                 <span class="rank-number">${item.rank}</span>
                 <span class="rank-username">${this.escapeHtml(item.username)}</span>
+                <span class="rank-title">
+                    ${this.renderTitleBadge(item.selecteditem)}
+                </span>
                 <span class="rank-points">${item.totalpoint} điểm</span>
             </div>
         `).join('');
 
         this.rankList.innerHTML = html;
+    }
+
+    renderTitleBadge(selectedItem) {
+        if (!selectedItem || selectedItem === 'none' || selectedItem === 'null') {
+            return '<span class="title-badge none">Chưa có danh hiệu</span>';
+        }
+        
+        const titleName = this.titleNames[selectedItem] || 'Danh hiệu';
+        return `<span class="title-badge ${selectedItem}">${titleName}</span>`;
     }
 
     getRankClass(rank) {

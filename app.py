@@ -334,12 +334,17 @@ def get_rankings():
         # Format dữ liệu ranking
         rank_data = []
         for rank, user_data in enumerate(rankings, 1):
+            # Debug: log thông tin user
+            app.logger.info(f"User {user_data['username']} - selecteditem: {user_data.get('selecteditem')}")
+            
             rank_data.append({
                 'rank': rank,
                 'username': user_data['username'],
-                'totalpoint': user_data['totalpoint']
+                'totalpoint': user_data['totalpoint'],
+                'selecteditem': user_data.get('selecteditem', 'none')  # Đảm bảo luôn có giá trị
             })
         
+        app.logger.info(f"Rankings data: {rank_data}")  # Debug
         return jsonify({'success': True, 'rankings': rank_data})
     
     except Exception as e:

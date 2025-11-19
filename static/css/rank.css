@@ -1,5 +1,5 @@
 .rank-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -12,7 +12,7 @@
 
 .rank-header {
     display: grid;
-    grid-template-columns: 80px 1fr 150px;
+    grid-template-columns: 80px 1fr 200px 150px;
     gap: 15px;
     padding: 15px;
     background-color: #f5f5f5;
@@ -23,7 +23,7 @@
 
 .rank-item {
     display: grid;
-    grid-template-columns: 80px 1fr 150px;
+    grid-template-columns: 80px 1fr 200px 150px;
     gap: 15px;
     padding: 15px;
     background-color: white;
@@ -50,10 +50,54 @@
     word-break: break-word;
 }
 
+.rank-title {
+    text-align: center;
+    font-weight: 500;
+    color: #555;
+}
+
 .rank-points {
     text-align: right;
     font-weight: bold;
     color: #2196F3;
+}
+
+/* Badge styles for titles */
+.title-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    min-width: 120px;
+}
+
+.title-badge.item1 {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.title-badge.item2 {
+    background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+
+.title-badge.item3 {
+    background: linear-gradient(135deg, #45b7d1, #96c93d);
+}
+
+.title-badge.item4 {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.title-badge.item5 {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.title-badge.none {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    opacity: 0.7;
 }
 
 /* Top 3 styles */
@@ -100,19 +144,42 @@
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .rank-container {
         padding: 10px;
     }
     
     .rank-header,
     .rank-item {
-        grid-template-columns: 60px 1fr 100px;
+        grid-template-columns: 60px 1fr 120px 80px;
         gap: 10px;
         padding: 12px;
+        font-size: 0.9em;
     }
     
     .rank-points {
         font-size: 0.9em;
+    }
+    
+    .title-badge {
+        min-width: 100px;
+        padding: 3px 8px;
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .rank-header,
+    .rank-item {
+        grid-template-columns: 50px 1fr 90px 70px;
+        gap: 8px;
+        padding: 10px;
+        font-size: 0.85em;
+    }
+    
+    .title-badge {
+        min-width: 80px;
+        padding: 2px 6px;
+        font-size: 0.75em;
     }
 }
