@@ -33,10 +33,8 @@ class Database:
             if table_exists:
                 # Nếu bảng đã tồn tại, kiểm tra và thêm cột nếu thiếu
                 self._migrate_database(cursor)
-                print("found db")
             else:
                 # Nếu bảng chưa tồn tại, tạo mới
-                print("db not found")
                 cursor.execute('''
                     CREATE TABLE users (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
