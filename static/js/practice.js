@@ -449,16 +449,17 @@ class QuestionManager {
         const resultData = Array.isArray(result) ? result[0] : result;
         const acstatus = resultData?.acstatus;
         const explain = resultData?.explain || 'Không có giải thích';
-
+        const fixed_explain = explain.replace(/\\n/g, "\n");
         const statusText = acstatus === 'true' ? 'ĐÚNG' : 'SAI';
         const statusClass = acstatus === 'true' ? 'correct' : 'incorrect';
         
         resultDiv.innerHTML = `
             <p class="${statusClass}"><strong>Kết quả: ${statusText}</strong></p>
-            <p><strong>Giải thích:</strong> ${explain}</p>
+            <p><strong>Giải thích:</strong> ${fixed_explain}</p>
         `;
 
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        this.renderMathJax([resultDiv]);
     }
 
     static renderMathJax(elements) {
