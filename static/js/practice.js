@@ -414,7 +414,16 @@ class QuestionManager {
             return;
         }
 
-        DomUtils.setButtonLoading(submitBtn, true, 'Đang kiểm tra...');
+        // XOÁ NÚT ngay lập tức
+        if (submitBtn) {
+            submitBtn.remove();
+        }
+
+        // VÔ HIỆU HOÁ HÀM - không thể gọi lại
+        window.submitAnswer = function() {
+            console.warn('Hàm submitAnswer đã bị vô hiệu hoá');
+            return;
+        };
 
         try {
             const result = await ApiService.request(API_CONFIG.endpoints.processAnswer, {
@@ -428,8 +437,7 @@ class QuestionManager {
 
         } catch (error) {
             this.handleError(error, 'Kiểm tra đáp án');
-        } finally {
-            DomUtils.setButtonLoading(submitBtn, false);
+            // Không khôi phục nút và hàm khi có lỗi
         }
     }
 
