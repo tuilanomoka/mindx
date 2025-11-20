@@ -168,7 +168,7 @@ body::before {
     opacity: 0.8;
 }
 
-/* Tabs Navigation */
+
 .tabs-nav {
     display: flex;
     gap: 8px;
@@ -230,7 +230,7 @@ body::before {
     to { opacity: 1; }
 }
 
-/* Learning Grid - Fix Overflow */
+
 .learning-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -303,7 +303,7 @@ body::before {
     margin-top: 2px;
 }
 
-/* Section Headers */
+
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -330,7 +330,7 @@ body::before {
     font-size: 0.85rem;
 }
 
-/* Scrollable Wrapper */
+
 .scrollable-wrapper {
     flex: 1;
     min-height: 0;
@@ -362,7 +362,7 @@ body::before {
     background: rgba(240, 228, 145, 0.5);
 }
 
-/* Items Grid */
+
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -466,7 +466,7 @@ body::before {
     min-height: 100px;
 }
 
-/* Ranking */
+
 .ranking-scroll {
     flex: 1;
     min-height: 0; 
@@ -597,7 +597,7 @@ body::before {
     padding-bottom: 5px;
 }
 
-/* Notification Modal */
+
 .notification-modal {
     position: fixed;
     top: 50%;
@@ -666,7 +666,7 @@ body::before {
     75% { transform: rotateZ(5deg); }
 }
 
-/* Confirm Modal */
+
 .confirm-modal {
     position: fixed;
     top: 0;
@@ -1045,4 +1045,69 @@ body::before {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(255, 107, 107, 0.4);
     background: linear-gradient(90deg, #ff5252, #e53935);
+}
+
+.scrollable-wrapper {
+    
+    padding: 20px; 
+}
+
+.setting-field {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-field label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #F0E491; 
+    display: block;
+    margin-bottom: 4px;
+}
+
+.setting-field input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(240, 228, 145, 0.3);
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.setting-field input[type="password"]::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.setting-field input[type="password"]:focus {
+    border-color: #F0E491;
+    box-shadow: 0 0 0 3px rgba(240, 228, 145, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+
+.scrollable-wrapper .modal-btn-confirm {
+    width: auto;
+    align-self: flex-start; 
+    min-width: 200px;
+    margin-top: 20px !important;
+}
+
+
+.scrollable-wrapper .logout-btn {
+    margin: 20px auto 0 auto; 
+    background: linear-gradient(90deg, #f44336, #e91e63); 
+    padding: 12px 30px;
+}
+
+
+@media (max-width: 480px) {
+    .setting-field input[type="password"] {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
 }

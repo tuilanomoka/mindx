@@ -424,7 +424,7 @@ function SubmitAccountChanges() {
         showModal('❌ Vui lòng điền đầy đủ thông tin', 'error');
     } else {
         if (RepeatPassword != NewPassword) {
-            showModal('❌ Mật khẩu lập lại không khóp', 'error');
+            showModal('❌ Mật khẩu lặp lại không khớp', 'error');
             return;
         }
         fetch('/api/change_account_information', {
@@ -439,9 +439,9 @@ function SubmitAccountChanges() {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    showModal(`✨ Đã cập nhập thông tin thành công!`, 'success');
+                    showModal(`✨ Đã cập nhật thông tin thành công!`, 'success');
                 } else {
-                    showModal('❌ ' + (data.error || 'Cập nhập thông tin thất bại'), 'error');
+                    showModal('❌ ' + (data.error || 'Cập nhật thông tin thất bại'), 'error');
                 }
             })
             .catch(err => {

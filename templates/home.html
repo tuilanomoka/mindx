@@ -116,22 +116,32 @@
         </div>
         <div id="settings" class="tab-pane">
             <div class="section-header">
-                <h3>⚙ Cài đặt</h3>
+                <h3>⚙️ Cài đặt tài khoản</h3>
             </div>
             <div class="scrollable-wrapper">
-                <div>
-                    <p>Mật khẩu mới</p> <input type="password" name="Newpassword" id = "NewPassword">
+                <div class="setting-field">
+                    <label for="NewPassword">Mật khẩu mới</label>
+                    <input type="password" name="Newpassword" id="NewPassword" placeholder="Nhập mật khẩu mới">
                 </div>
-                <div>
-                    <p>Nhập lại mật khẩu mới</p> <input type="password" name="repeatPassword" id = "RepeatPassword">
+                <div class="setting-field">
+                    <label for="RepeatPassword">Nhập lại mật khẩu mới</label>
+                    <input type="password" name="repeatPassword" id="RepeatPassword" placeholder="Nhập lại mật khẩu mới">
                 </div>
-                <div>
-                    <p>Mật khẩu hiện tại</p> <input type="password" name="CurrentPassword" id = "CurrentPassword">
+                <div class="setting-field">
+                    <label for="CurrentPassword">Mật khẩu hiện tại</label>
+                    <input type="password" name="CurrentPassword" id="CurrentPassword" placeholder="Nhập mật khẩu hiện tại">
                 </div>
-                <button class="logout-btn" onclick="SubmitAccountChanges()">✅ Lưu thay đổi</button>
+                <button class="modal-btn modal-btn-confirm" style="margin-top: 20px;" onclick="SubmitAccountChanges()">
+                    ✅ Lưu thay đổi
+                </button>
+                
+                <hr style="margin-top: 30px; border-color: rgba(240, 228, 145, 0.2);">
+                
+                <button class="logout-btn" onclick="logout()">
+                    🚪 Đăng xuất khỏi tài khoản
+                </button>
             </div>
         </div>
-        <button class="logout-btn" onclick="logout()">🚪 Đăng xuất</button>
     </div>
 </div>
 {% endblock %}
