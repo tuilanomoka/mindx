@@ -2,39 +2,42 @@ function showAlert(message, type = 'error') {
     alert(message);
 }
 
+
 let loadingElement = null;
 
-function showLoading() {
-    if (loadingElement) return;
+function showLoading(message = 'Đang phân tích bài toán...') {
+    if (loadingElement) {
+        const textEl = loadingElement.querySelector('.loading-text');
+        if(textEl) textEl.textContent = message;
+        return;
+    }
     loadingElement = document.createElement('div');
-    loadingElement.className = 'loading-text';
-    loadingElement.textContent = 'Đang tải...';
-    loadingElement.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        font-size: 14px;
-        z-index: 9999;
-        font-weight: 500;
+    loadingElement.className = 'loading-toast';
+    loadingElement.innerHTML = `
+        <div class="spinner-icon"></div>
+        <span class="loading-text">${message}</span>
     `;
     document.body.appendChild(loadingElement);
 }
 
 function hideLoading() {
     if (loadingElement) {
-        loadingElement.remove();
-        loadingElement = null;
+        loadingElement.style.opacity = '0';
+        setTimeout(() => {
+            if (loadingElement) {
+                loadingElement.remove();
+                loadingElement = null;
+            }
+        }, 300);
     }
 }
+
 
 async function submitMathQuestion() {
     const lop = document.getElementById('lop')?.value;
     const questionField = document.getElementById('question');
     const question = questionField?.getValue?.() || questionField?.value || '';
+    
     const submitBtn = document.getElementById('submitBtn');
     const hiddenSection = document.getElementById('hiddenSection');
     const questionDiv = document.getElementById('question_div');
@@ -45,8 +48,9 @@ async function submitMathQuestion() {
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Đang xử lý...';
-    showLoading();
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '⏳ Đang xử lý...';
+    showLoading('AI đang giải bài toán...');
 
     try {
         const response = await fetch('/process-question', {
@@ -58,84 +62,116 @@ async function submitMathQuestion() {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
+        hideLoading();
 
         if (data.error) {
             showAlert('Có lỗi xảy ra: ' + data.error);
         } else {
-            processAndDisplayData(data);
             questionDiv.classList.add('hidden');
             hiddenSection.classList.remove('hidden');
+            processAndDisplayData(data);
         }
     } catch (error) {
         console.error('Error:', error);
+        hideLoading();
         showAlert('Có lỗi kết nối xảy ra. Vui lòng thử lại!');
     } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Gửi câu hỏi';
-        hideLoading();
+        submitBtn.innerHTML = originalBtnText;
     }
 }
 
 function processAndDisplayData(data) {
     const problemDiv = document.getElementById('problem');
     const solveDiv = document.getElementById('solve');
+    const footerDiv = document.getElementById('action-footer');
 
-    if (!problemDiv || !solveDiv) {
-        console.error('Required elements not found');
-        return;
-    }
+    if (!problemDiv || !solveDiv) return;
 
     problemDiv.innerHTML = '';
     solveDiv.innerHTML = '';
+    if(footerDiv) footerDiv.innerHTML = ''; 
 
+    
     const questionField = document.getElementById('question');
     const questionContent = questionField?.getValue?.() || questionField?.value || '';
     if (questionContent) problemDiv.innerHTML = `\\[${questionContent}\\]`;
 
+    
     let questionData = null;
     if (Array.isArray(data) && data.length > 0) questionData = data[0];
     else if (data && typeof data === 'object') questionData = data;
 
     if (!questionData || !questionData.loigiai) {
-        solveDiv.innerHTML = '<p>Không có dữ liệu giải bài tập.</p>';
+        solveDiv.innerHTML = '<p style="text-align:center; color:white;">Không có dữ liệu giải bài tập.</p>';
+    } else {
+        
+        let stepsHTML = '';
+        questionData.loigiai.forEach((step, index) => {
+            const stepNumber = step.buoc || index + 1;
+            let stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
+            
+            stepDetail = stepDetail.replace(/\\n/g, '<br>');
+
+            stepsHTML += `
+                <div class="step">
+                    <h4>Bước ${stepNumber}</h4>
+                    <div class="step-content">${stepDetail}</div>
+                </div>
+            `;
+        });
+        solveDiv.innerHTML = stepsHTML;
+
+        
+        if (questionData.dapan) {
+            const finalAns = questionData.dapan.replace(/\\n/g, '<br>');
+            solveDiv.innerHTML += `
+                <div class="answer-section">
+                    <h3>Đáp án:</h3>
+                    <div class="answer-content">${finalAns}</div>
+                </div>
+            `;
+        }
+    }
+
+    
+    if (footerDiv) {
+        const continueBtn = document.createElement('button');
+        continueBtn.className = 'btn-continue';
+        continueBtn.innerHTML = '🔄 Tiếp tục bài toán khác';
+        
+        continueBtn.onclick = () => window.location.reload();
+        
+        footerDiv.appendChild(continueBtn);
+    }
+
+    
+    setTimeout(() => {
         renderMathJax([problemDiv, solveDiv]);
-        return;
-    }
-
-    let stepsHTML = '';
-    questionData.loigiai.forEach((step, index) => {
-        const stepNumber = step.buoc || index + 1;
-        const stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
-        stepsHTML += `
-            <div class="step">
-                <h4>Bước ${stepNumber}:</h4>
-                <div class="step-content">${stepDetail}</div>
-            </div>
-        `;
-    });
-
-    solveDiv.innerHTML = stepsHTML;
-
-    if (questionData.dapan) {
-        solveDiv.innerHTML += `
-            <div class="answer-section">
-                <h3>Đáp án:</h3>
-                <div class="answer-content">${questionData.dapan}</div>
-            </div>
-        `;
-    }
-
-    renderMathJax([problemDiv, solveDiv]);
+        
+        problemDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
 }
 
 function renderMathJax(elements) {
-    if (window.MathJax?.typesetPromise) {
-        setTimeout(() => {
-            window.MathJax.typesetPromise(elements).catch(err => console.error('MathJax error:', err));
-        }, 100);
+    const validElements = elements.filter(el => el && el instanceof HTMLElement);
+    if (validElements.length === 0) return;
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        if (window.MathJax.texReset) window.MathJax.texReset();
+        window.MathJax.typesetPromise(validElements).catch(err => {
+            console.warn('MathJax rendering warning:', err);
+            if (window.MathLive) validElements.forEach(el => window.MathLive.renderMathInElement(el));
+        });
+    } else if (window.MathLive && window.MathLive.renderMathInElement) {
+        validElements.forEach(el => window.MathLive.renderMathInElement(el));
     }
 }
 
 function navigateToHome() {
     window.location.href = '/';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Learn mode initialized');
+});

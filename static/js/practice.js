@@ -1,5 +1,4 @@
 function showAlert(message, type = 'error') {
-    const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
     alert(message);
 }
 
@@ -27,53 +26,66 @@ const API_CONFIG = {
 const DomUtils = {
     getElement: (id) => document.getElementById(id),
     getValue: (element) => element?.getValue?.() || element?.value || '',
-    toggleVisibility: (element, show) => element && element.classList.toggle('hidden', !show),
+    toggleVisibility: (element, show) => {
+        if(!element) return;
+        if(show) element.classList.remove('hidden');
+        else element.classList.add('hidden');
+    },
     disableElement: (element, disabled) => element && (element.disabled = disabled),
     setButtonLoading: (button, loading, text = 'Đang xử lý...') => {
         if (!button) return;
         if (loading) {
-            button.dataset.originalText = button.textContent;
-            button.textContent = text;
+            button.dataset.originalText = button.innerHTML;
+            button.innerHTML = `<span class="btn-spinner">⏳</span> ${text}`;
             button.disabled = true;
         } else {
-            button.textContent = button.dataset.originalText || 'Gửi';
+            button.innerHTML = button.dataset.originalText || 'Gửi';
             button.disabled = false;
         }
     }
 };
 
+
 let loadingElement = null;
 
-function showLoading() {
-    if (loadingElement) return;
+function showLoading(message = 'Đang xử lý...') {
+    if (loadingElement) {
+        
+        const textEl = loadingElement.querySelector('.loading-text');
+        if(textEl) textEl.textContent = message;
+        return;
+    }
+
     loadingElement = document.createElement('div');
-    loadingElement.className = 'loading-text';
-    loadingElement.textContent = 'Đang tải...';
-    loadingElement.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        font-size: 14px;
-        z-index: 9999;
-        font-weight: 500;
+    loadingElement.className = 'loading-toast';
+    
+    loadingElement.innerHTML = `
+        <div class="spinner-icon"></div>
+        <span class="loading-text">${message}</span>
     `;
+    
     document.body.appendChild(loadingElement);
 }
 
 function hideLoading() {
     if (loadingElement) {
-        loadingElement.remove();
-        loadingElement = null;
+        loadingElement.style.opacity = '0';
+        loadingElement.style.transform = 'translateY(10px)';
+        loadingElement.style.transition = 'all 0.3s ease';
+        
+        setTimeout(() => {
+            if (loadingElement) {
+                loadingElement.remove();
+                loadingElement = null;
+            }
+        }, 300);
     }
 }
 
 class ApiService {
     static async request(endpoint, data = null, method = 'POST') {
-        showLoading();
+        
+        
         const config = {
             method,
             headers: API_CONFIG.headers,
@@ -94,8 +106,6 @@ class ApiService {
         } catch (error) {
             console.error('API Request Error:', error);
             throw error;
-        } finally {
-            hideLoading();
         }
     }
 }
@@ -148,7 +158,7 @@ class SessionManager {
 
     static updateGradeDisplay(grade) {
         const gradeElement = DomUtils.getElement('grade');
-        if (gradeElement) gradeElement.textContent = `Số điểm hiện tại của bạn: ${grade}`;
+        if (gradeElement) gradeElement.textContent = `Điểm hiện tại: ${grade}`;
     }
 
     static validateSession() {
@@ -161,10 +171,7 @@ class SessionManager {
 
     static handleError(error, context) {
         console.error(`${context} Error:`, error);
-        let userMessage = error.message.includes('Endpoint không tồn tại') ? 'Tính năng này đang được bảo trì. Vui lòng thử lại sau.' :
-                         error.message.includes('cần đăng nhập') ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.' :
-                         error.message.includes('Lỗi server') ? 'Máy chủ đang gặp sự cố. Vui lòng thử lại sau.' :
-                         `${context} thất bại: ${error.message}`;
+        let userMessage = error.message;
         if (error.message.includes('cần đăng nhập')) setTimeout(() => window.location.href = '/login', 2000);
         showAlert(userMessage);
     }
@@ -179,22 +186,32 @@ class QuestionManager {
         const questionDiv = DomUtils.getElement('question_div');
 
         if (!lop || !question) return showAlert('Vui lòng nhập đầy đủ lớp và câu hỏi!');
-        if (question.length < 5) return showAlert('Câu hỏi quá ngắn. Vui lòng nhập câu hỏi chi tiết hơn.');
+        if (question.length < 2) return showAlert('Câu hỏi quá ngắn.');
 
         DomUtils.setButtonLoading(submitBtn, true);
+        
+        
+        showLoading('Đang suy nghĩ...');
+
         try {
             const data = await ApiService.request(API_CONFIG.endpoints.processQuestion, { lop, question });
+            
+            
+            hideLoading();
+
             if (data.error) throw new Error(data.error);
 
             practiceState.viewedSteps.clear();
             practiceState.numberOfSteps = 0;
 
             this.processAndDisplayData(data);
+            
             DomUtils.toggleVisibility(questionDiv, false);
             DomUtils.toggleVisibility(hiddenSection, true);
 
             await SessionManager.newSession();
         } catch (error) {
+            hideLoading(); 
             this.handleError(error, 'Xử lý câu hỏi');
         } finally {
             DomUtils.setButtonLoading(submitBtn, false);
@@ -202,11 +219,12 @@ class QuestionManager {
     }
 
     static processAndDisplayData(data) {
-        const problemDiv = DomUtils
-
-.getElement('problem');
+        const problemDiv = DomUtils.getElement('problem');
         const solveDiv = DomUtils.getElement('solve');
-        if (!problemDiv || !solveDiv) return console.error('Required elements not found');
+        const resultContainer = DomUtils.getElement('answer-result-container');
+        if(resultContainer) resultContainer.innerHTML = '';
+
+        if (!problemDiv || !solveDiv) return;
 
         problemDiv.innerHTML = '';
         solveDiv.innerHTML = '';
@@ -216,7 +234,7 @@ class QuestionManager {
 
         const questionData = this.extractQuestionData(data);
         if (!questionData) {
-            solveDiv.innerHTML = '<p>Không có dữ liệu giải bài tập.</p>';
+            solveDiv.innerHTML = '<p style="color:white; text-align:center">Không có dữ liệu giải bài tập.</p>';
             this.renderMathJax([problemDiv, solveDiv]);
             return;
         }
@@ -232,7 +250,7 @@ class QuestionManager {
 
     static displaySolutionSteps(container, questionData) {
         if (!questionData.loigiai || !Array.isArray(questionData.loigiai)) {
-            container.innerHTML = '<p>Không có lời giải chi tiết.</p>';
+            container.innerHTML = '<p style="color:white; text-align:center">Không có lời giải chi tiết.</p>';
             return;
         }
         practiceState.numberOfSteps = questionData.loigiai.length;
@@ -243,7 +261,7 @@ class QuestionManager {
             return `
                 <div id="step-${index + 1}" class="step">
                     <a href="javascript:void(0);" class="step-link" data-step="${index}">
-                        Bước ${stepNumber}
+                        🔓 Mở gợi ý Bước ${stepNumber}
                     </a>
                     <div class="step-content hidden" data-step="${index}">
                         ${stepDetail}
@@ -253,8 +271,11 @@ class QuestionManager {
         }).join('');
 
         container.innerHTML = stepsHTML;
-        container.removeEventListener('click', this.handleStepClick);
-        container.addEventListener('click', this.handleStepClick);
+        
+        const links = container.querySelectorAll('.step-link');
+        links.forEach(link => {
+            link.addEventListener('click', (e) => this.handleStepClick(e));
+        });
     }
 
     static displayFinalAnswer(container, questionData) {
@@ -262,15 +283,17 @@ class QuestionManager {
         const answerHTML = `
             <div class="answer-section">
                 <a href="javascript:void(0);" id="final-answer-link">
-                    <h3>Xem đáp án cuối cùng</h3>
+                   🏳️ Tôi bỏ cuộc - Xem đáp án cuối cùng (0 điểm)
                 </a>
                 <div id="final-answer-content" class="hidden">
-                    ${questionData.dapan}
+                    Đáp án: ${questionData.dapan}
                 </div>
             </div>
         `;
-        container.innerHTML += answerHTML;
-        DomUtils.getElement('final-answer-link')?.addEventListener('click', this.handleFinalAnswerClick, { once: true });
+        container.insertAdjacentHTML('beforeend', answerHTML);
+        
+        const link = DomUtils.getElement('final-answer-link');
+        if(link) link.addEventListener('click', this.handleFinalAnswerClick, { once: true });
     }
 
     static handleStepClick = (e) => {
@@ -281,7 +304,8 @@ class QuestionManager {
         if (!stepContent) return;
 
         stepContent.classList.remove('hidden');
-        link.classList.add('hidden');
+        link.style.display = 'none';
+        
         practiceState.viewedSteps.add(link.dataset.step);
         this.renderMathJax([stepContent]);
 
@@ -291,69 +315,130 @@ class QuestionManager {
         }
     }
 
+    static appendContinueButton(container) {
+        if (container.querySelector('.btn-continue')) return;
+
+        const btn = document.createElement('button');
+        btn.className = 'btn-continue';
+        btn.innerHTML = '🔄 Tiếp tục bài toán khác';
+        btn.onclick = () => {
+            window.location.reload();
+        };
+        container.appendChild(btn);
+    }
+
     static handleFinalAnswerClick = () => {
         const content = DomUtils.getElement('final-answer-content');
         const link = DomUtils.getElement('final-answer-link');
-        content?.classList.remove('hidden');
-        link?.classList.add('hidden');
+        
+        DomUtils.toggleVisibility(content, true);
+        DomUtils.toggleVisibility(link, false);
+        
         this.renderMathJax([content]);
-        practiceState.sessionId && SessionManager.zeroOutPoints();
+        if(practiceState.sessionId) SessionManager.zeroOutPoints();
+
+        const container = document.querySelector('.answer-section');
+        this.appendContinueButton(container);
     }
 
     static async submitAnswer() {
         const userAnswer = DomUtils.getValue(DomUtils.getElement('user-answer'));
-        const submitBtn = document.querySelector('button[onclick="submitAnswer()"]');
+        const submitBtn = document.querySelector('.submit-answer-btn') || document.querySelector('button[onclick="submitAnswer()"]');
+        
         const lop = DomUtils.getValue(DomUtils.getElement('lop'));
         const question = DomUtils.getValue(DomUtils.getElement('question'));
 
         if (!userAnswer) return showAlert('Vui lòng nhập câu trả lời!');
         if (!SessionManager.validateSession()) return;
 
-        submitBtn?.remove();
-        window.submitAnswer = () => console.warn('Hàm submitAnswer đã bị vô hiệu hoá');
+        if(submitBtn) submitBtn.disabled = true;
+
+        
+        showLoading('Đang kiểm tra câu trả lời...');
 
         try {
             const result = await ApiService.request(API_CONFIG.endpoints.processAnswer, {
                 lop, question, user_answer: userAnswer, id: practiceState.sessionId
             });
+            
+            hideLoading(); 
             this.showAnswerResult(result);
         } catch (error) {
+            hideLoading(); 
             this.handleError(error, 'Kiểm tra đáp án');
+            if(submitBtn) submitBtn.disabled = false;
         }
     }
 
     static showAnswerResult(result) {
-        let resultDiv = DomUtils.getElement('answer-result');
-        if (!resultDiv) {
-            resultDiv = document.createElement('div');
-            resultDiv.id = 'answer-result';
-            resultDiv.className = 'result';
-            DomUtils.getElement('hiddenSection')?.appendChild(resultDiv);
+        const container = DomUtils.getElement('answer-result-container') || DomUtils.getElement('hiddenSection');
+        const oldResult = document.getElementById('answer-result');
+        if(oldResult) oldResult.remove();
+
+        const resultDiv = document.createElement('div');
+        resultDiv.id = 'answer-result';
+        
+        const data = Array.isArray(result) ? result[0] : result;
+        const isCorrect = data?.acstatus === 'true';
+        
+        resultDiv.className = `result ${isCorrect ? 'correct' : 'incorrect'}`;
+        
+        
+        let explain = data?.explain || '';
+        if (!explain || explain === 'null') {
+            explain = 'Không có giải thích chi tiết.';
+        } else {
+            
+            explain = explain.replace(/\\n/g, '<br>');
         }
 
-        const data = Array.isArray(result) ? result[0] : result;
-        const status = data?.acstatus === 'true' ? 'ĐÚNG' : 'SAI';
-        const statusClass = data?.acstatus === 'true' ? 'correct' : 'incorrect';
-        const explain = (data?.explain || 'Không có giải thích').replace(/\\n/g, '\n');
-
         resultDiv.innerHTML = `
-            <p class="${statusClass}"><strong>Kết quả: ${status}</strong></p>
+            <h3>${isCorrect ? '🎉 CHÍNH XÁC!' : '❌ CHƯA ĐÚNG'}</h3>
             <p><strong>Giải thích:</strong> ${explain}</p>
         `;
-        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        this.renderMathJax([resultDiv]);
+        
+        if(DomUtils.getElement('answer-result-container')) {
+            DomUtils.getElement('answer-result-container').appendChild(resultDiv);
+        } else {
+            container.appendChild(resultDiv);
+        }
+
+        
+        setTimeout(() => {
+            this.renderMathJax([resultDiv]);
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 50); 
+
+        this.appendContinueButton(resultDiv);
     }
 
     static renderMathJax(elements) {
-        if (window.MathJax?.typesetPromise) {
-            setTimeout(() => window.MathJax.typesetPromise(elements).catch(err => console.error('MathJax error:', err)), 100);
+        const validElements = elements.filter(el => el && el instanceof HTMLElement);
+        
+        if (validElements.length === 0) return;
+
+        
+        if (window.MathJax && window.MathJax.typesetPromise) {
+     
+            if (window.MathJax.texReset) window.MathJax.texReset();
+            
+            window.MathJax.typesetPromise(validElements)
+                .catch(err => {
+                    console.warn('MathJax Rendering Warning:', err);
+        
+                    if (window.MathLive) {
+                        validElements.forEach(el => window.MathLive.renderMathInElement(el));
+                    }
+                });
+        } else if (window.MathLive && window.MathLive.renderMathInElement) {
+            
+            validElements.forEach(el => window.MathLive.renderMathInElement(el));
         }
     }
 
     static handleError(error, context) {
         console.error(`${context} Error:`, error);
-        const msg = error.message.includes('HTTP error') ? 'Có lỗi kết nối xảy ra. Vui lòng thử lại!' : error.message;
-        showAlert(`${context} thất bại: ${msg}`);
+        showAlert(`${context} thất bại: ${error.message}`);
     }
 }
 
@@ -361,18 +446,10 @@ function navigateToHome() {
     window.location.href = '/';
 }
 
-document.addEventListener('DOMContentLoaded', () => console.log('Practice page initialized'));
-
-window.addEventListener('beforeunload', () => {
-    const solveDiv = DomUtils.getElement('solve');
-    solveDiv && solveDiv.removeEventListener('click', QuestionManager.handleStepClick);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Practice page initialized (New Design & Loading Toast)');
 });
 
-window.newSession = SessionManager.newSession.bind(SessionManager);
-window.ZeroOutPoint = SessionManager.zeroOutPoints.bind(SessionManager);
-window.processPoint = SessionManager.processPoints.bind(SessionManager);
 window.submitMathQuestion = QuestionManager.submitMathQuestion.bind(QuestionManager);
 window.submitAnswer = QuestionManager.submitAnswer.bind(QuestionManager);
-window.handleStepClick = QuestionManager.handleStepClick.bind(QuestionManager);
-window.handleFinalAnswerClick = QuestionManager.handleFinalAnswerClick.bind(QuestionManager);
 window.navigateToHome = navigateToHome;

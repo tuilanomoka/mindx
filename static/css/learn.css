@@ -1,13 +1,327 @@
-#result {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+html, body {
+    width: 100%;
+    height: auto !important; 
+    min-height: 100vh;
+    overflow-y: auto !important; 
+    background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
 }
 
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(240, 228, 145, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(101, 140, 88, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- Container & Card --- */
+.learn-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: auto !important;
+    min-height: 100vh;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.learn-card {
+    margin: 0 auto;
+    background: linear-gradient(135deg, rgba(42, 71, 56, 0.95) 0%, rgba(58, 95, 76, 0.95) 100%);
+    border: 2px solid rgba(240, 228, 145, 0.5);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 0 80px rgba(240, 228, 145, 0.15), 0 20px 60px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: slideUp 0.6s ease-out;
+    color: #fff;
+    height: auto;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hidden { display: none !important; }
+
+/* --- Header --- */
+.learn-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(240, 228, 145, 0.2);
+    padding-bottom: 20px;
+    margin-bottom: 10px;
+}
+
+.header-title { text-align: center; }
+.header-title h1 {
+    font-size: 1.8rem;
+    color: #F0E491;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.tagline {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.back-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #F0E491;
+}
+.header-spacer { width: 80px; }
+
+/* --- Input Elements --- */
+.form-group { margin-bottom: 20px; }
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #F0E491;
+    font-size: 1rem;
+}
+
+.select-wrapper { position: relative; max-width: 200px; }
+.custom-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1.5px solid rgba(240, 228, 145, 0.3);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+}
+.custom-select:focus {
+    border-color: #F0E491;
+    box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
+}
+
+.math-input-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1.5px solid rgba(240, 228, 145, 0.3);
+    border-radius: 12px;
+    padding: 4px;
+    transition: all 0.3s;
+}
+.math-input-container:focus-within {
+    border-color: #F0E491;
+    box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+math-field {
+    width: 100%;
+    background: transparent;
+    color: white;
+    font-size: 1.2rem;
+    padding: 10px;
+    --caret-color: #F0E491;
+    --selection-background-color: rgba(240, 228, 145, 0.3);
+    --selection-color: white;
+    border: none;
+    outline: none;
+}
+math-field::part(container) { border: none; background: transparent; }
+
+/* --- Buttons --- */
+.primary-btn {
+    background: linear-gradient(90deg, #F0E491, #BBC863);
+    color: #1a3a28;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3);
+}
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(240, 228, 145, 0.4);
+}
+.primary-btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(1); }
+
+/* Nút Tiếp tục mới */
+.btn-continue {
+    background: linear-gradient(90deg, #4caf50, #66bb6a);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 30px;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.btn-continue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+    background: linear-gradient(90deg, #43a047, #5eb363);
+}
+
+/* --- Output Section --- */
+.solution-section {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeIn 0.5s;
+}
+
+.section-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.1);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.problem-display {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+.math-content { font-size: 1.4rem; color: white; }
+
+/* Solution Steps */
+.steps-list { display: flex; flex-direction: column; gap: 16px; }
+
+.step {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.step h4 {
+    background: rgba(255, 255, 255, 0.05);
+    color: #64b5f6;
+    padding: 12px 20px;
+    margin: 0;
+    font-size: 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.step-content {
+    padding: 20px;
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+.answer-section {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.answer-section h3 {
+    color: #a5d6a7;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.answer-content {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+/* --- Loading Toast --- */
+.loading-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(42, 71, 56, 0.95);
+    border: 1px solid rgba(240, 228, 145, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    pointer-events: none;
+    animation: slideInToast 0.4s;
+}
+
+.spinner-icon {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: #F0E491;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-text { color: #fff; font-weight: 600; }
+
+@keyframes slideInToast {
+    from { opacity: 0; transform: translateY(20px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 768px) {
+    .learn-card { padding: 24px 16px; }
+    .header-title h1 { font-size: 1.4rem; }
+    .loading-toast { bottom: 20px; right: 20px; left: 20px; justify-content: center; }
+}

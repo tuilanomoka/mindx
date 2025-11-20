@@ -84,11 +84,6 @@ def practice_page():
 def learn_page():
     return render_template('learn.html', username=get_username())
 
-@app.route('/rank')
-@login_required
-def rank_page():
-    return render_template('rank.html', username=get_username())
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory('resources/icons', 'favicon.ico')
@@ -254,8 +249,6 @@ def process_answer():
             json_data = compare_result[0]
             if json_data.get('acstatus',"false") == "true":
                 # add point
-                if "score_status_" + question_id not in session: raise ValueError("Invalid session") 
-                if session["score_status_" + question_id] is True: raise ValueError("Closed session")
                 if "score_"+str(question_id) in session:
                     EarnedPoint = session[ "score_"+str(question_id)]
                     u_data = db.get_user_data(session['username'])
@@ -269,7 +262,6 @@ def process_answer():
             print("Sai câu trả lời.")
 
         session["score_"+str(question_id)] = 0
-        session["score_status_"+str(question_id)] = True
         return jsonify(compare_result)
     except Exception as e:
         app.logger.error(f"Error processing answer: {str(e)}")
@@ -291,7 +283,6 @@ def new_session_id():
         return jsonify({'success': False, 'grade': 0, 'comment': 'Already exists', 'id': ''}), 409
     
     session[session_key] = 100
-    session[f"score_status_{epoch_time}"] = False
     app.logger.info(f"new_session_id: Created new session: {session_key} for user: {session['username']}")
     
     return jsonify({
@@ -308,11 +299,6 @@ def update_temporary_score():
     data = request.get_json()
     change_in_score = data.get('change','0').strip()
     session_id = data.get('id','').strip()
-    if "score_status_" + session_id not in session:
-        return jsonify({'success':False,'grade':0,'comment':'Invalid session', 'id':''}), 404
-    if session["score_status_" + session_id] is True:
-        #session closed
-        return jsonify({'success':False,'grade':0,'comment':'Session closed', 'id':''}), 403
     if "score_"+session_id not in session:
         return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
     
@@ -327,11 +313,6 @@ def zero_out_temporary_score():
         return jsonify({'success':False,'grade':0,'comment':'Not logged in', 'id':''})
     data = request.get_json()
     session_id = data.get('id','').strip()
-    if "score_status_" + session_id not in session:
-        return jsonify({'success':False,'grade':0,'comment':'Invalid session', 'id':''}), 404
-    if session["score_status_" + session_id] is True:
-        #session closed
-        return jsonify({'success':False,'grade':0,'comment':'Session closed', 'id':''}), 403
     if "score_"+session_id not in session:
         return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
     session["score_"+session_id] = 0
