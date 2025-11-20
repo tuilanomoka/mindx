@@ -9,6 +9,11 @@
         <div class="user-header">
             <h1>Chào, <span class="username-text">{{ username }}</span>! 👋</span></h1>
             <p class="tagline">Tiếp tục hành trình học tập của bạn</p>
+            {% if username == 'admin' %}
+                <button class="admin-btn" onclick="navigateToAdmin()">
+                    <span>⚙️</span> Trang quản trị
+                </button>
+            {% endif %}
         </div>
 
         
