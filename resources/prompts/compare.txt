@@ -33,4 +33,5 @@ Bạn là trợ lý giáo dục chuyên nghiệp. Nhiệm vụ: phân tích và 
 - **KHÔNG** nhắc đến user hay so sánh
 - **CHỈ** trình bày lời giải đúng + kết luận
 - **LUÔN** dùng LaTeX cho toán học
+- **KHÔNG** được dùng markdown, chỉ dùng latex với kí hiệu $, các text khác thì vẫn ghi như bình thưởng.
 ```

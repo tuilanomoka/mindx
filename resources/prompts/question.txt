@@ -15,6 +15,7 @@ QUY TẮC:
   "loigiai": [{"buoc": "1", "chitiet": "Bài toán vượt quá kiến thức lớp [LỚP]"}],
   "dapan": "Ngoài phạm vi kiến thức"
 }
+- Không được dùng markdown, chỉ dùng latex với kí hiệu $, các text khác thì vẫn ghi như bình thưởng.
 
 BÀI TOÁN:
 Lớp: {lop}
