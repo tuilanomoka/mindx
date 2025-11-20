@@ -43,21 +43,12 @@ html, body {
     display: flex;
 }
 
-.glow-wrapper {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    animation: glow-pulse 4s ease-in-out infinite;
-    margin: auto;
-}
-
 @keyframes glow-pulse {
-    0%, 100% {
-        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.15)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.08));
-    }
-    50% {
-        filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.25)) drop-shadow(0 0 50px rgba(59, 130, 246, 0.12));
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+.glow-wrapper {
+    animation: glow-pulse 4s ease-in-out infinite;
 }
 
 @keyframes slideUp {
