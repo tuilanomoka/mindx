@@ -3,21 +3,21 @@ class HomePage {
         this.userData = null;
         this.shopData = [];
         this.rankingData = [];
-        this.itemMap = {}; 
+        this.itemMap = {};
         this.init();
     }
 
     async init() {
-        
+
         await this.loadShopItems();
-        
-        
+
+
         await Promise.all([
             this.loadUserData(),
             this.loadRankings()
         ]);
 
-        
+
         this.displayUserInfo();
         this.displaySelectedItem();
         this.renderInventory();
@@ -27,11 +27,11 @@ class HomePage {
 
     async loadShopItems() {
         try {
-            const response = await fetch('/static/json/shop.json'); 
+            const response = await fetch('/static/json/shop.json');
             const data = await response.json();
             if (data.items) {
                 this.shopData = data.items;
-                
+
                 this.shopData.forEach(item => {
                     this.itemMap[item.id] = item.name;
                 });
@@ -57,7 +57,7 @@ class HomePage {
         try {
             const response = await fetch('/api/rankings');
             const data = await response.json();
-            
+
             if (data.success || Array.isArray(data.rankings)) {
                 this.rankingData = data.rankings || [];
             }
@@ -66,7 +66,7 @@ class HomePage {
         }
     }
 
-    
+
     getTitleName(itemId) {
         if (!itemId || itemId === 'none' || itemId === 'null') return 'Chưa có danh hiệu';
         return this.itemMap[itemId] || 'Danh hiệu ẩn';
@@ -74,10 +74,10 @@ class HomePage {
 
     displayUserInfo() {
         if (!this.userData) return;
-        
-        
-        
-        
+
+
+
+
         const total = this.userData.total_points ?? this.userData.totalpoint ?? 0;
         const current = this.userData.current_points ?? this.userData.currentpoint ?? 0;
 
@@ -99,13 +99,13 @@ class HomePage {
             return;
         }
 
-        
+
         const selected = this.userData.inventory.find(item => item.selected === true || item.selected === 1);
 
         if (selected) {
-            
+
             const realName = this.getTitleName(selected.id);
-            
+
             display.innerHTML = `
                 <div class="active-item">
                     <div>✨ <span class="item-badge-inline">${realName}</span></div>
@@ -122,8 +122,8 @@ class HomePage {
         const grid = document.getElementById('inventory-grid');
         const empty = document.getElementById('empty-inventory');
         const count = document.getElementById('inv-count');
-        
-        
+
+
         const inventory = this.userData?.inventory || [];
 
         if (inventory.length === 0) {
@@ -135,10 +135,10 @@ class HomePage {
 
         if (empty) empty.style.display = 'none';
         if (count) count.textContent = `${inventory.length} danh hiệu`;
-        
+
         if (grid) {
             grid.innerHTML = inventory.map(item => {
-                
+
                 const displayName = this.getTitleName(item.id);
                 return `
                 <div class="item-card inventory-item ${item.selected ? 'selected' : ''}" 
@@ -161,7 +161,7 @@ class HomePage {
         grid.innerHTML = this.shopData.map(item => {
             const isOwned = inventoryIds.includes(item.id);
             const canBuy = userPoints >= item.price && !isOwned;
-            
+
             let statusClass = isOwned ? 'owned-status' : (canBuy ? 'available-status' : 'disabled-status');
             let statusText = isOwned ? '✓ Đã sở hữu' : (canBuy ? '💰 Mua ngay' : '✗ Thiếu điểm');
 
@@ -180,7 +180,7 @@ class HomePage {
         const rankList = document.getElementById('rankList');
         if (!rankList || !this.rankingData) return;
 
-        
+
         rankList.innerHTML = this.rankingData.map((item, index) => {
             let medalClass = '';
             let medal = '';
@@ -189,8 +189,8 @@ class HomePage {
             else if (index === 2) { medalClass = 'rank-third'; medal = '🥉'; }
 
             const rankNum = index + 1;
-            
-            
+
+
             const point = item.totalpoint !== undefined ? item.totalpoint : (item.points || 0);
             const itemId = item.selecteditem || item.title_id || 'none';
             const titleName = this.getTitleName(itemId);
@@ -207,7 +207,7 @@ class HomePage {
             `;
         }).join('');
 
-        
+
         this.updateUserFixedRank();
     }
 
@@ -228,29 +228,29 @@ class HomePage {
 
 
         const myIndex = this.rankingData.findIndex(r => r.username === currentUsername);
-        
-        let rankDisplay = '-';      
-        let pointsDisplay = 0;    
-        let titleId = 'none';     
+
+        let rankDisplay = '-';
+        let pointsDisplay = 0;
+        let titleId = 'none';
 
         if (myIndex !== -1) {
-          
+
             const rankData = this.rankingData[myIndex];
             rankDisplay = '#' + (myIndex + 1);
             pointsDisplay = rankData.totalpoint ?? rankData.points ?? 0;
             titleId = rankData.selecteditem ?? rankData.title_id ?? 'none';
         } else {
-           
-            rankDisplay = 'Bạn'; 
-            
-    
+
+            rankDisplay = 'Bạn';
+
+
             pointsDisplay = this.userData?.total_points ?? 0;
 
             const selectedItem = this.userData?.inventory?.find(i => i.selected === true || i.selected === 1);
             titleId = selectedItem ? selectedItem.id : 'none';
         }
 
-       
+
         const titleName = this.getTitleName(titleId);
 
         userRankBox.innerHTML = `
@@ -269,10 +269,10 @@ class HomePage {
 function switchTab(tabName) {
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
+
     const pane = document.getElementById(tabName);
     const btn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
-    
+
     if (pane) pane.classList.add('active');
     if (btn) btn.classList.add('active');
 }
@@ -362,19 +362,19 @@ function buyItem(itemId, itemName) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_id: itemId })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showModal(`✨ Mua thành công "${itemName}"!`, 'success');
-            setTimeout(() => location.reload(), 1800);
-        } else {
-            showModal('❌ ' + (data.error || 'Mua thất bại'), 'error');
-        }
-    })
-    .catch(err => {
-        console.error('Buy error:', err);
-        showModal('❌ Lỗi kết nối', 'error');
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showModal(`✨ Mua thành công "${itemName}"!`, 'success');
+                setTimeout(() => location.reload(), 1800);
+            } else {
+                showModal('❌ ' + (data.error || 'Mua thất bại'), 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Buy error:', err);
+            showModal('❌ Lỗi kết nối', 'error');
+        });
 }
 
 function selectItem(itemId) {
@@ -383,19 +383,19 @@ function selectItem(itemId) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_id: itemId })
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showModal('✨ Đổi danh hiệu thành công!', 'success');
-            setTimeout(() => location.reload(), 1800);
-        } else {
-            showModal('❌ ' + (data.error || 'Đổi thất bại'), 'error');
-        }
-    })
-    .catch(err => {
-        console.error('Select error:', err);
-        showModal('❌ Lỗi kết nối', 'error');
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showModal('✨ Đổi danh hiệu thành công!', 'success');
+                setTimeout(() => location.reload(), 1800);
+            } else {
+                showModal('❌ ' + (data.error || 'Đổi thất bại'), 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Select error:', err);
+            showModal('❌ Lỗi kết nối', 'error');
+        });
 }
 
 function navigateToStudy() {
@@ -415,3 +415,39 @@ function logout() {
 document.addEventListener('DOMContentLoaded', () => {
     new HomePage();
 });
+function SubmitAccountChanges() {
+    const NewPassword = document.getElementById('NewPassword').value;
+    const RepeatPassword = document.getElementById('RepeatPassword').value;
+    const CurrentPassword = document.getElementById('CurrentPassword').value;
+    if (!NewPassword || !RepeatPassword || !CurrentPassword) {
+        console.error('Submit data error: 1 of the field did not have the expected value.');
+        showModal('❌ Vui lòng điền đầy đủ thông tin', 'error');
+    } else {
+        if (RepeatPassword != NewPassword) {
+            showModal('❌ Mật khẩu lập lại không khóp', 'error');
+            return;
+        }
+        fetch('/api/change_account_information', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "newpassword":NewPassword,
+                "repeatpassword":RepeatPassword,
+                "currentpassword":CurrentPassword
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showModal(`✨ Đã cập nhập thông tin thành công!`, 'success');
+                } else {
+                    showModal('❌ ' + (data.error || 'Cập nhập thông tin thất bại'), 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Change account information:', err);
+                showModal('❌ Lỗi kết nối', 'error');
+            });
+
+    }
+}
