@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% block linkcss %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 {% block content %}
 <div class="home-container">
     <div class="home-card">
-        
+
         <div class="user-header">
             <h1>Chào, <span class="username-text">{{ username }}</span>! 👋</span></h1>
             <p class="tagline">Tiếp tục hành trình học tập của bạn</p>
             {% if username == 'admin' %}
-                <button class="admin-btn" onclick="navigateToAdmin()">
-                    <span>⚙️</span> Trang quản trị
-                </button>
+            <button class="admin-btn" onclick="navigateToAdmin()">
+                <span>⚙️</span> Trang quản trị
+            </button>
             {% endif %}
         </div>
 
-        
+
         <div class="user-stats">
             <div class="stat-item">
                 <span class="stat-label">⭐ Điểm tích lũy</span>
@@ -28,10 +28,10 @@
             </div>
         </div>
 
-        
+
         <div id="selected-item-display" class="selected-item-box"></div>
 
-        
+
         <div class="tabs-nav">
             <button class="tab-btn active" onclick="switchTab('learning')">
                 <span>📚</span> Học tập
@@ -45,9 +45,12 @@
             <button class="tab-btn" onclick="switchTab('ranking')">
                 <span>🏆</span> Xếp hạng
             </button>
+            <button class="tab-btn" onclick="switchTab('settings')">
+                <span>⚙️</span> Cài đặt
+            </button>
         </div>
 
-        
+
         <div id="learning" class="tab-pane active">
             <div class="learning-grid">
                 <div class="mode-button study-btn" onclick="navigateToStudy()">
@@ -65,7 +68,7 @@
             </div>
         </div>
 
-        
+
         <div id="inventory" class="tab-pane">
             <div class="section-header">
                 <h3>👑 Kho danh hiệu</h3>
@@ -79,7 +82,7 @@
             </div>
         </div>
 
-        
+
         <div id="shop" class="tab-pane">
             <div class="section-header">
                 <h3>🛍️ Cửa hàng danh hiệu</h3>
@@ -90,13 +93,13 @@
             </div>
         </div>
 
-        
+
         <div id="ranking" class="tab-pane">
             <div class="section-header">
                 <h3>🏆 Bảng xếp hạng toàn cộng đồng</h3>
             </div>
 
-            
+
             <div id="user-rank-box" class="user-rank-display">
                 <div class="rank-row user-rank">
                     <span class="rank-col rank-number">-</span>
@@ -106,17 +109,32 @@
                 </div>
             </div>
 
-            
+
             <div class="scrollable-wrapper ranking-scroll">
                 <div id="rankList" class="rank-list"></div>
             </div>
         </div>
-
-        
+        <div id="settings" class="tab-pane">
+            <div class="section-header">
+                <h3>⚙ Cài đặt</h3>
+            </div>
+            <div class="scrollable-wrapper">
+                <div>
+                    <p>Mật khẩu mới</p> <input type="password" name="Newpassword" id = "NewPassword">
+                </div>
+                <div>
+                    <p>Nhập lại mật khẩu mới</p> <input type="password" name="repeatPassword" id = "RepeatPassword">
+                </div>
+                <div>
+                    <p>Mật khẩu hiện tại</p> <input type="password" name="CurrentPassword" id = "CurrentPassword">
+                </div>
+                <button class="logout-btn" onclick="SubmitAccountChanges()">✅ Lưu thay đổi</button>
+            </div>
+        </div>
         <button class="logout-btn" onclick="logout()">🚪 Đăng xuất</button>
     </div>
 </div>
 {% endblock %}
 {% block linkjs %}
-    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

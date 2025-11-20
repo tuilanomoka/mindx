@@ -687,5 +687,29 @@ def get_user_points():
         app.logger.error(f"Error getting user points: {str(e)}")
         return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
+@app.route('/api/change_account_information', methods  = ["POST"])
+@login_required
+def change_account_information():
+    if 'username' not in session:
+        return jsonify({"success":False,"error":"Chưa đăng nhập"}), 403
+    try:
+        data = request.get_json()
+        RequestNewPassword = data.get("newpassword",'').strip()
+        RequestRepeatPassword = data.get("repeatpassword",'').strip()
+        RequestCurrentPassword = data.get("currentpassword",'').strip()
+        if not db.login_user(session['username'], RequestCurrentPassword):
+            return jsonify({"success":False,"error":"Mật khẩu hiện tại không đúng"}), 403
+        if RequestNewPassword != RequestRepeatPassword:
+            return jsonify({"success":False,"error":"Mật khẩu mới và mật khẩu mới nhập lại không khóp"}), 403
+        if RequestNewPassword == '' or RequestRepeatPassword == '':
+            return jsonify({"success":False,"error":"Mật khẩu mới hay mật khẩu mới nhập lại không được để trống"}), 403
+        if RequestCurrentPassword == RequestNewPassword:
+            return jsonify({"success":True,"error":""}), 200
+        db.update_field(session['username'], 'password', RequestNewPassword)
+        return jsonify({"success":True,"error":""}), 200
+    except ExceptionType as e:
+        app.logger.error(f"Error trying to update data: {e}")
+        return jsonify({"success":False,"error":e}), 500
+            
 if __name__ == '__main__':
     app.run(debug=True)
