@@ -1,84 +1,113 @@
-function handleLogin(event) {
-    event.preventDefault();
+// auth.js - Tối ưu hóa
+class AuthHandler {
+    constructor() {
+        this.init();
+    }
 
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
-    
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            navigateToHome();
-        } else {
-            alert(data.message);
+    init() {
+        console.log('AuthHandler initialized');
+    }
+
+    async handleLogin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+        
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showMessage(data.message, 'success');
+                this.navigateToHome();
+            } else {
+                this.showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('Có lỗi xảy ra khi đăng nhập!', 'error');
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi đăng nhập!');
-    });
-}
+    }
 
-function handleRegister(event) {
-    event.preventDefault();
-    const username = document.getElementById('register-username').value;
-    const password = document.getElementById('register-password').value;
-    const confirmPassword = document.getElementById('register-confirm-password').value;
-    
-    if (password !== confirmPassword) {
-        alert('Mật khẩu xác nhận không khớp!');
-        return;
-    }
-    
-    if (password.length < 8) {
-        alert('Mật khẩu phải có ít nhất 8 ký tự!');
-        return;
-    }
-    
-    fetch('/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            username: username,
-            password: password
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            navigateToLogin();
-        } else {
-            alert(data.message);
+    async handleRegister(event) {
+        event.preventDefault();
+        const username = document.getElementById('register-username').value;
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm-password').value;
+        
+        // Validation
+        if (password !== confirmPassword) {
+            this.showMessage('Mật khẩu xác nhận không khớp!', 'error');
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Có lỗi xảy ra khi đăng ký!');
-    });
-}
+        
+        if (password.length < 8) {
+            this.showMessage('Mật khẩu phải có ít nhất 8 ký tự!', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showMessage(data.message, 'success');
+                this.navigateToLogin();
+            } else {
+                this.showMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('Có lỗi xảy ra khi đăng ký!', 'error');
+        }
+    }
 
-function togglePassword(inputId) {
-    const input = document.getElementById(inputId);
-    const button = input.nextElementSibling;
-    
-    if (input.type === 'password') {
-        input.type = 'text';
-        button.textContent = '🙈';
-    } else {
-        input.type = 'password';
-        button.textContent = '👁️';
+    togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling;
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            button.textContent = '👁️';
+        }
+    }
+
+    showMessage(message, type = 'info') {
+        // Có thể thay thế alert bằng modal đẹp hơn
+        alert(message);
+    }
+
+    navigateToHome() {
+        window.location.href = '/';
+    }
+
+    navigateToLogin() {
+        window.location.href = '/login';
     }
 }
+
+// Khởi tạo instance
+const auth = new AuthHandler();
+
+// Gán hàm toàn cục để có thể gọi từ HTML
+window.handleLogin = (event) => auth.handleLogin(event);
+window.handleRegister = (event) => auth.handleRegister(event);
+window.togglePassword = (inputId) => auth.togglePassword(inputId);

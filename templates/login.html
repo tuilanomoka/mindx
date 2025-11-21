@@ -1,48 +1,63 @@
 {% extends "base.html" %}
-{% block linkcss %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-{% endblock %}
 {% block content %}
-<div class="auth-container">
-    <div class="glow-wrapper">
-        <div class="auth-card">
-            <a href="/" class="back-link">← Quay lại trang chủ</a>
+<div class="auth-container flex items-center justify-center w-full h-screen p-5 bg-gradient-to-br from-[#1a3a28] via-[#2d5a41] to-[#1a3a28]">
+    <div class="glow-wrapper relative w-full max-w-[450px] animate-[glow-pulse_4s_ease-in-out_infinite]">
+        <div class="auth-card bg-gradient-to-br from-[rgba(42,71,56,0.95)] to-[rgba(58,95,76,0.95)] border-2 border-[rgba(240,228,145,0.5)] backdrop-blur-[30px] rounded-[24px] p-12 text-center shadow-[0_0_80px_rgba(240,228,145,0.2),0_20px_60px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)] animate-[slideUp_0.7s_ease-out]">
+            <a href="/" class="back-link inline-flex items-center gap-2 text-[rgba(255,255,255,0.75)] no-underline text-[0.9rem] mb-6 transition-colors duration-300 hover:text-[#F0E491]">← Quay lại trang chủ</a>
             
-            <div class="card-header">
-                <h1>Đăng nhập</h1>
-                <p>Chào mừng trở lại với MindX</p>
+            <div class="card-header mb-7">
+                <h1 class="text-[2.2rem] font-extrabold tracking-[-0.02em] mb-2 text-white">Đăng nhập</h1>
+                <p class="text-[0.95rem] text-[rgba(255,255,255,0.85)] m-0">Chào mừng trở lại với MindX</p>
             </div>
             
             <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="login-username">Tên đăng nhập</label>
-                    <input type="text" id="login-username" class="form-input" placeholder="Tên đăng nhập của bạn" required>
+                <div class="form-group mb-5 text-left">
+                    <label for="login-username" class="block text-[0.9rem] font-semibold text-white mb-2 tracking-[0.3px]">Tên đăng nhập</label>
+                    <input type="text" id="login-username" class="form-input w-full bg-[rgba(101,140,88,0.25)] border-[1.5px] border-[rgba(240,228,145,0.3)] rounded-[10px] px-4 py-3 text-base text-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] outline-none font-inherit placeholder-[rgba(255,255,255,0.5)] hover:border-[rgba(240,228,145,0.45)] focus:bg-[rgba(101,140,88,0.4)] focus:border-[rgba(240,228,145,0.6)] focus:shadow-[0_0_0_4px_rgba(240,228,145,0.1)]" placeholder="Tên đăng nhập của bạn" required>
                 </div>
                 
-                <div class="form-group">
-                    <label for="login-password">Mật khẩu</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword('login-password')">👁️</button>
+                <div class="form-group mb-5 text-left">
+                    <label for="login-password" class="block text-[0.9rem] font-semibold text-white mb-2 tracking-[0.3px]">Mật khẩu</label>
+                    <div class="password-wrapper relative">
+                        <input type="password" id="login-password" class="form-input w-full bg-[rgba(101,140,88,0.25)] border-[1.5px] border-[rgba(240,228,145,0.3)] rounded-[10px] px-4 py-3 text-base text-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] outline-none font-inherit placeholder-[rgba(255,255,255,0.5)] hover:border-[rgba(240,228,145,0.45)] focus:bg-[rgba(101,140,88,0.4)] focus:border-[rgba(240,228,145,0.6)] focus:shadow-[0_0_0_4px_rgba(240,228,145,0.1)]" placeholder="Nhập mật khẩu" required>
+                        <button type="button" class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-[rgba(255,255,255,0.6)] cursor-pointer text-[1.1rem] p-1.5 transition-colors duration-300 z-10 hover:text-[#F0E491]" onclick="togglePassword('login-password')">👁️</button>
                     </div>
                 </div>
                 
-                <div class="form-footer" style="text-align: right; margin-top: 12px; margin-bottom: 0;">
-                    <a href="#">Quên mật khẩu?</a>
+                <div class="form-footer text-right mt-3 mb-0">
+                    <a href="#" class="text-[0.9rem] text-[rgba(255,255,255,0.75)] no-underline font-medium transition-colors duration-300 hover:text-white hover:underline">Quên mật khẩu?</a>
                 </div>
                 
-                <button type="submit" class="primary-button">Đăng nhập</button>
+                <button type="submit" class="primary-button w-full bg-gradient-to-r from-[#F0E491] to-[#BBC863] text-[#2a4738] border-none rounded-[12px] py-3.5 px-6 font-bold text-[1.05rem] cursor-pointer transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_6px_20px_rgba(240,228,145,0.35),0_0_30px_rgba(240,228,145,0.15)] mt-5 tracking-[0.5px] hover:-translate-y-[3px] hover:shadow-[0_12px_32px_rgba(240,228,145,0.45),0_0_40px_rgba(240,228,145,0.25)] hover:bg-gradient-to-r hover:from-[#BBC863] hover:to-[#F0E491] active:translate-y-[-1px]">Đăng nhập</button>
             </form>
             
-            <div class="divider">hoặc</div>
+            <div class="divider flex items-center my-6 text-[rgba(255,255,255,0.5)] text-[0.85rem] before:content-[''] before:flex-1 before:h-px before:bg-[rgba(240,228,145,0.2)] before:mr-3 after:content-[''] after:flex-1 after:h-px after:bg-[rgba(240,228,145,0.2)] after:ml-3">hoặc</div>
             
-            <div class="footer-text">
-                Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+            <div class="footer-text text-[0.9rem] text-[rgba(255,255,255,0.9)] mt-4">
+                Chưa có tài khoản? <a href="/register" class="text-[#F0E491] no-underline font-semibold transition-colors duration-300 hover:text-white hover:underline">Đăng ký ngay</a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes glow-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+</style>
 {% endblock %}
 {% block linkjs %}
-        <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}

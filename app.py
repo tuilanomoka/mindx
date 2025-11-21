@@ -56,6 +56,7 @@ def create_prompt_content(lop, question_data, prompt_template):
 
 # Routes
 @app.route('/')
+@redirect_if_logged_in
 def index():
     return render_template('index.html', username=get_username())
 

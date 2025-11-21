@@ -4,20 +4,14 @@ class HomePage {
         this.shopData = [];
         this.rankingData = [];
         this.itemMap = {};
+        this.currentPurchaseItem = null;
         this.init();
     }
 
     async init() {
-
         await this.loadShopItems();
-
-
-        await Promise.all([
-            this.loadUserData(),
-            this.loadRankings()
-        ]);
-
-
+        await Promise.all([this.loadUserData(), this.loadRankings()]);
+        
         this.displayUserInfo();
         this.displaySelectedItem();
         this.renderInventory();
@@ -31,7 +25,6 @@ class HomePage {
             const data = await response.json();
             if (data.items) {
                 this.shopData = data.items;
-
                 this.shopData.forEach(item => {
                     this.itemMap[item.id] = item.name;
                 });
@@ -57,15 +50,11 @@ class HomePage {
         try {
             const response = await fetch('/api/rankings');
             const data = await response.json();
-
-            if (data.success || Array.isArray(data.rankings)) {
-                this.rankingData = data.rankings || [];
-            }
+            this.rankingData = data.success ? (data.rankings || []) : [];
         } catch (error) {
             console.error('Lỗi tải rankings:', error);
         }
     }
-
 
     getTitleName(itemId) {
         if (!itemId || itemId === 'none' || itemId === 'null') return 'Chưa có danh hiệu';
@@ -75,19 +64,17 @@ class HomePage {
     displayUserInfo() {
         if (!this.userData) return;
 
-
-
-
         const total = this.userData.total_points ?? this.userData.totalpoint ?? 0;
         const current = this.userData.current_points ?? this.userData.currentpoint ?? 0;
 
-        const totalEl = document.getElementById('total-points');
-        const currentEl = document.getElementById('current-points');
-        const shopEl = document.getElementById('shop-points');
+        this.updateElementText('total-points', total);
+        this.updateElementText('current-points', current);
+        this.updateElementText('shop-points', current);
+    }
 
-        if (totalEl) totalEl.textContent = total;
-        if (currentEl) currentEl.textContent = current;
-        if (shopEl) shopEl.textContent = current;
+    updateElementText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
     }
 
     displaySelectedItem() {
@@ -99,22 +86,17 @@ class HomePage {
             return;
         }
 
-
         const selected = this.userData.inventory.find(item => item.selected === true || item.selected === 1);
 
         if (selected) {
-
             const realName = this.getTitleName(selected.id);
-
             display.innerHTML = `
                 <div class="active-item">
                     <div>✨ <span class="item-badge-inline">${realName}</span></div>
                 </div>
             `;
         } else {
-            display.innerHTML = `
-                <div class="no-item">Chưa đeo danh hiệu</div>
-            `;
+            display.innerHTML = `<div class="no-item">Chưa đeo danh hiệu</div>`;
         }
     }
 
@@ -122,7 +104,6 @@ class HomePage {
         const grid = document.getElementById('inventory-grid');
         const empty = document.getElementById('empty-inventory');
         const count = document.getElementById('inv-count');
-
 
         const inventory = this.userData?.inventory || [];
 
@@ -138,11 +119,10 @@ class HomePage {
 
         if (grid) {
             grid.innerHTML = inventory.map(item => {
-
                 const displayName = this.getTitleName(item.id);
                 return `
                 <div class="item-card inventory-item ${item.selected ? 'selected' : ''}" 
-                     onclick="selectItem('${item.id}')">
+                     onclick="homePage.selectItem('${item.id}')">
                     <div class="item-icon">👑</div>
                     <div class="item-name">${displayName}</div>
                     ${item.selected ? '<div class="item-badge-small">✓</div>' : ''}
@@ -166,7 +146,7 @@ class HomePage {
             let statusText = isOwned ? '✓ Đã sở hữu' : (canBuy ? '💰 Mua ngay' : '✗ Thiếu điểm');
 
             return `
-                <div class="item-card shop-item" onclick="handleBuyClick('${item.id}', '${item.name}', ${item.price}, ${isOwned})">
+                <div class="item-card shop-item" onclick="homePage.handleBuyClick('${item.id}', '${item.name}', ${item.price}, ${isOwned})">
                     <div class="item-icon">🛍️</div>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price">${item.price} điểm</div>
@@ -180,7 +160,6 @@ class HomePage {
         const rankList = document.getElementById('rankList');
         if (!rankList || !this.rankingData) return;
 
-
         rankList.innerHTML = this.rankingData.map((item, index) => {
             let medalClass = '';
             let medal = '';
@@ -189,8 +168,6 @@ class HomePage {
             else if (index === 2) { medalClass = 'rank-third'; medal = '🥉'; }
 
             const rankNum = index + 1;
-
-
             const point = item.totalpoint !== undefined ? item.totalpoint : (item.points || 0);
             const itemId = item.selecteditem || item.title_id || 'none';
             const titleName = this.getTitleName(itemId);
@@ -206,7 +183,6 @@ class HomePage {
                 </div>
             `;
         }).join('');
-
 
         this.updateUserFixedRank();
     }
@@ -226,35 +202,26 @@ class HomePage {
             return;
         }
 
-
         const myIndex = this.rankingData.findIndex(r => r.username === currentUsername);
-
         let rankDisplay = '-';
         let pointsDisplay = 0;
         let titleId = 'none';
 
         if (myIndex !== -1) {
-
             const rankData = this.rankingData[myIndex];
             rankDisplay = '#' + (myIndex + 1);
             pointsDisplay = rankData.totalpoint ?? rankData.points ?? 0;
             titleId = rankData.selecteditem ?? rankData.title_id ?? 'none';
         } else {
-
             rankDisplay = 'Bạn';
-
-
             pointsDisplay = this.userData?.total_points ?? 0;
-
             const selectedItem = this.userData?.inventory?.find(i => i.selected === true || i.selected === 1);
             titleId = selectedItem ? selectedItem.id : 'none';
         }
 
-
         const titleName = this.getTitleName(titleId);
-
         userRankBox.innerHTML = `
-            <div class="rank-row user-rank active-user-row">
+            <div class="rank-row user-rank">
                 <span class="rank-col rank-number">${rankDisplay}</span>
                 <span class="rank-col rank-name">Bạn (${currentUsername})</span>
                 <span class="rank-col rank-title">
@@ -264,138 +231,194 @@ class HomePage {
             </div>
         `;
     }
-}
 
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-    const pane = document.getElementById(tabName);
-    const btn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
-
-    if (pane) pane.classList.add('active');
-    if (btn) btn.classList.add('active');
-}
-
-function showModal(message, type = 'success') {
-    const existing = document.querySelector('.notification-modal');
-    if (existing) existing.remove();
-
-    const modal = document.createElement('div');
-    modal.className = `notification-modal ${type}`;
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="modal-icon">${type === 'success' ? '✅' : '❌'}</span>
-            <p class="modal-message">${message}</p>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-
-    setTimeout(() => {
-        modal.classList.remove('show');
-        setTimeout(() => modal.remove(), 300);
-    }, 2500);
-}
-
-function showConfirmModal(message, itemName, itemPrice, itemId) {
-    const existing = document.querySelector('.confirm-modal');
-    if (existing) existing.remove();
-
-    const modal = document.createElement('div');
-    modal.className = 'confirm-modal';
-    modal.innerHTML = `
-        <div class="modal-overlay" onclick="closeConfirmModal()"></div>
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <span class="modal-title-icon">🛍️</span>
-                <h3 class="modal-title">Xác nhận mua danh hiệu</h3>
-                <button class="modal-close" onclick="closeConfirmModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <p class="modal-item-name">${itemName}</p>
-                <p class="modal-item-price">💰 ${itemPrice} điểm</p>
-                <p class="modal-question">Bạn có chắc muốn mua danh hiệu này?</p>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Hủy</button>
-                <button class="modal-btn modal-btn-confirm" onclick="buyItem('${itemId}', '${itemName}'); closeConfirmModal();">Xác nhận</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
-}
-
-function closeConfirmModal() {
-    const modal = document.querySelector('.confirm-modal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => modal.remove(), 300);
-    }
-}
-
-function handleBuyClick(itemId, itemName, itemPrice, isOwned) {
-    if (isOwned) {
-        showModal('❌ Bạn đã sở hữu danh hiệu này rồi!', 'error');
-        return;
+    switchTab(tabName) {
+        // Hide all tab panes
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.add('hidden');
+            pane.classList.remove('active');
+        });
+        
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Show selected tab pane and activate button
+        const pane = document.getElementById(tabName);
+        const btn = document.querySelector(`[onclick*="switchTab('${tabName}')"]`);
+        
+        if (pane) {
+            pane.classList.remove('hidden');
+            pane.classList.add('active');
+        }
+        if (btn) btn.classList.add('active');
     }
 
-    const userPoints = parseInt(document.getElementById('current-points').textContent) || 0;
-    if (userPoints < itemPrice) {
-        showModal('❌ Bạn không đủ điểm để mua danh hiệu này!', 'error');
-        return;
+    handleBuyClick(itemId, itemName, itemPrice, isOwned) {
+        if (isOwned) {
+            this.showModal('❌ Bạn đã sở hữu danh hiệu này rồi!', 'error');
+            return;
+        }
+
+        const userPoints = parseInt(document.getElementById('current-points').textContent) || 0;
+        if (userPoints < itemPrice) {
+            this.showModal('❌ Bạn không đủ điểm để mua danh hiệu này!', 'error');
+            return;
+        }
+
+        this.currentPurchaseItem = { id: itemId, name: itemName, price: itemPrice };
+        this.showConfirmModal();
     }
 
-    showConfirmModal('Xác nhận mua danh hiệu', itemName, itemPrice, itemId);
-}
+    showConfirmModal() {
+        if (!this.currentPurchaseItem) return;
+        
+        const modal = document.getElementById('confirm-modal');
+        const itemName = document.querySelector('.modal-item-name');
+        const itemPrice = document.querySelector('.modal-item-price');
+        
+        if (modal && itemName && itemPrice) {
+            itemName.textContent = this.currentPurchaseItem.name;
+            itemPrice.textContent = `💰 ${this.currentPurchaseItem.price} điểm`;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+    }
 
-function buyItem(itemId, itemName) {
-    fetch('/api/shop/buy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: itemId })
-    })
-        .then(res => res.json())
-        .then(data => {
+    closeConfirmModal() {
+        const modal = document.getElementById('confirm-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    }
+
+    confirmPurchase() {
+        if (!this.currentPurchaseItem) return;
+        
+        this.buyItem(this.currentPurchaseItem.id, this.currentPurchaseItem.name);
+        this.closeConfirmModal();
+    }
+
+    async buyItem(itemId, itemName) {
+        try {
+            const response = await fetch('/api/shop/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: itemId })
+            });
+            const data = await response.json();
+            
             if (data.success) {
-                showModal(`✨ Mua thành công "${itemName}"!`, 'success');
+                this.showModal(`✨ Mua thành công "${itemName}"!`, 'success');
                 setTimeout(() => location.reload(), 1800);
             } else {
-                showModal('❌ ' + (data.error || 'Mua thất bại'), 'error');
+                this.showModal('❌ ' + (data.error || 'Mua thất bại'), 'error');
             }
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('Buy error:', err);
-            showModal('❌ Lỗi kết nối', 'error');
-        });
-}
+            this.showModal('❌ Lỗi kết nối', 'error');
+        }
+    }
 
-function selectItem(itemId) {
-    fetch('/api/inventory/select', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_id: itemId })
-    })
-        .then(res => res.json())
-        .then(data => {
+    async selectItem(itemId) {
+        try {
+            const response = await fetch('/api/inventory/select', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: itemId })
+            });
+            const data = await response.json();
+            
             if (data.success) {
-                showModal('✨ Đổi danh hiệu thành công!', 'success');
+                this.showModal('✨ Đổi danh hiệu thành công!', 'success');
                 setTimeout(() => location.reload(), 1800);
             } else {
-                showModal('❌ ' + (data.error || 'Đổi thất bại'), 'error');
+                this.showModal('❌ ' + (data.error || 'Đổi thất bại'), 'error');
             }
-        })
-        .catch(err => {
+        } catch (err) {
             console.error('Select error:', err);
-            showModal('❌ Lỗi kết nối', 'error');
-        });
+            this.showModal('❌ Lỗi kết nối', 'error');
+        }
+    }
+
+    showModal(message, type = 'success') {
+        const modal = document.getElementById('notification-modal');
+        const modalIcon = modal.querySelector('.modal-icon');
+        const modalMessage = modal.querySelector('.modal-message');
+        
+        if (modal && modalIcon && modalMessage) {
+            modalIcon.textContent = type === 'success' ? '✅' : '❌';
+            modalMessage.textContent = message;
+            
+            if (type === 'error') {
+                modal.classList.add('error');
+                modalIcon.style.animation = 'shakeIcon 0.6s ease';
+            } else {
+                modal.classList.remove('error');
+                modalIcon.style.animation = 'bounceIcon 0.6s ease';
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalIcon.style.animation = '';
+                }, 300);
+            }, 2500);
+        }
+    }
+
+    async SubmitAccountChanges() {
+        const NewPassword = document.getElementById('NewPassword').value;
+        const RepeatPassword = document.getElementById('RepeatPassword').value;
+        const CurrentPassword = document.getElementById('CurrentPassword').value;
+        
+        if (!NewPassword || !RepeatPassword || !CurrentPassword) {
+            this.showModal('❌ Vui lòng điền đầy đủ thông tin', 'error');
+            return;
+        }
+        
+        if (RepeatPassword !== NewPassword) {
+            this.showModal('❌ Mật khẩu lặp lại không khớp', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/change_account_information', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    "newpassword": NewPassword,
+                    "repeatpassword": RepeatPassword,
+                    "currentpassword": CurrentPassword
+                })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                this.showModal(`✨ Đã cập nhật thông tin thành công!`, 'success');
+                // Clear form
+                document.getElementById('NewPassword').value = '';
+                document.getElementById('RepeatPassword').value = '';
+                document.getElementById('CurrentPassword').value = '';
+            } else {
+                this.showModal('❌ ' + (data.error || 'Cập nhật thông tin thất bại'), 'error');
+            }
+        } catch (err) {
+            console.error('Change account information:', err);
+            this.showModal('❌ Lỗi kết nối', 'error');
+        }
+    }
+}
+
+// Global functions for onclick handlers
+function switchTab(tabName) {
+    homePage.switchTab(tabName);
 }
 
 function navigateToStudy() {
@@ -406,48 +429,30 @@ function navigateToPractice() {
     window.location.href = '/practice';
 }
 
+function navigateToAdmin() {
+    window.location.href = '/admin';
+}
+
 function logout() {
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
         window.location.href = '/logout';
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new HomePage();
-});
-function SubmitAccountChanges() {
-    const NewPassword = document.getElementById('NewPassword').value;
-    const RepeatPassword = document.getElementById('RepeatPassword').value;
-    const CurrentPassword = document.getElementById('CurrentPassword').value;
-    if (!NewPassword || !RepeatPassword || !CurrentPassword) {
-        console.error('Submit data error: 1 of the field did not have the expected value.');
-        showModal('❌ Vui lòng điền đầy đủ thông tin', 'error');
-    } else {
-        if (RepeatPassword != NewPassword) {
-            showModal('❌ Mật khẩu lặp lại không khớp', 'error');
-            return;
-        }
-        fetch('/api/change_account_information', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                "newpassword":NewPassword,
-                "repeatpassword":RepeatPassword,
-                "currentpassword":CurrentPassword
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    showModal(`✨ Đã cập nhật thông tin thành công!`, 'success');
-                } else {
-                    showModal('❌ ' + (data.error || 'Cập nhật thông tin thất bại'), 'error');
-                }
-            })
-            .catch(err => {
-                console.error('Change account information:', err);
-                showModal('❌ Lỗi kết nối', 'error');
-            });
-
-    }
+function closeConfirmModal() {
+    homePage.closeConfirmModal();
 }
+
+function confirmPurchase() {
+    homePage.confirmPurchase();
+}
+
+function SubmitAccountChanges() {
+    homePage.SubmitAccountChanges();
+}
+
+// Initialize the application
+let homePage;
+document.addEventListener('DOMContentLoaded', () => {
+    homePage = new HomePage();
+});

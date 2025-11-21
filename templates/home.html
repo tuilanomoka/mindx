@@ -1,149 +1,551 @@
 {% extends "base.html" %}
 {% block linkcss %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 {% block content %}
-<div class="home-container">
-    <div class="home-card">
+<!-- Background Animation -->
+<div class="bg-animation"></div>
 
-        <div class="user-header">
-            <h1>Chào, <span class="username-text">{{ username }}</span>! 👋</span></h1>
-            <p class="tagline">Tiếp tục hành trình học tập của bạn</p>
+<div class="home-container flex items-center justify-center w-full min-h-screen p-5 relative z-10">
+    <div class="home-card bg-gradient-to-br from-[rgba(42,71,56,0.95)] to-[rgba(58,95,76,0.95)] border-2 border-[rgba(240,228,145,0.5)] backdrop-blur-3xl rounded-3xl p-10 shadow-[0_0_80px_rgba(240,228,145,0.2),0_20px_60px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)] w-full max-w-[1200px] max-h-[90vh] flex flex-col animate-[slideUp_0.7s_ease-out] overflow-y-auto overflow-x-hidden">
+        <!-- User Header -->
+        <div class="user-header mb-6 text-center flex-shrink-0">
+            <h1 class="text-4xl font-extrabold tracking-tight mb-2 text-white">Chào, <span class="username-text bg-gradient-to-r from-[#F0E491] to-[#BBC863] bg-clip-text text-transparent">{{ username }}</span>! 👋</h1>
+            <p class="tagline text-lg text-white/85 m-0 font-medium">Tiếp tục hành trình học tập của bạn</p>
             {% if username == 'admin' %}
-            <button class="admin-btn" onclick="navigateToAdmin()">
+            <button class="admin-btn bg-gradient-to-r from-[#ff6b6b] to-[#ee5a52] text-white border-none py-2.5 px-5 rounded-xl font-semibold text-base cursor-pointer transition-all duration-300 mt-3 inline-flex items-center gap-1.5 shadow-[0_4px_12px_rgba(255,107,107,0.3)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(255,107,107,0.4)] hover:bg-gradient-to-r hover:from-[#ff5252] hover:to-[#e53935]" onclick="navigateToAdmin()">
                 <span>⚙️</span> Trang quản trị
             </button>
             {% endif %}
         </div>
 
-
-        <div class="user-stats">
-            <div class="stat-item">
-                <span class="stat-label">⭐ Điểm tích lũy</span>
-                <span class="stat-value" id="total-points">0</span>
+        <!-- User Stats -->
+        <div class="user-stats flex justify-center gap-8 mb-5 flex-shrink-0 flex-wrap">
+            <div class="stat-item text-center bg-[rgba(101,140,88,0.25)] border border-[rgba(240,228,145,0.35)] py-3.5 px-7 rounded-xl transition-all duration-300 hover:bg-[rgba(101,140,88,0.35)] hover:border-[rgba(240,228,145,0.5)] hover:shadow-[0_8px_24px_rgba(240,228,145,0.15)]">
+                <span class="stat-label block text-sm text-white/70 mb-1">⭐ Điểm tích lũy</span>
+                <span class="stat-value block text-2xl font-extrabold text-[#F0E491]" id="total-points">0</span>
             </div>
-            <div class="stat-item">
-                <span class="stat-label">🔥 Điểm hiện tại</span>
-                <span class="stat-value" id="current-points">0</span>
+            <div class="stat-item text-center bg-[rgba(101,140,88,0.25)] border border-[rgba(240,228,145,0.35)] py-3.5 px-7 rounded-xl transition-all duration-300 hover:bg-[rgba(101,140,88,0.35)] hover:border-[rgba(240,228,145,0.5)] hover:shadow-[0_8px_24px_rgba(240,228,145,0.15)]">
+                <span class="stat-label block text-sm text-white/70 mb-1">🔥 Điểm hiện tại</span>
+                <span class="stat-value block text-2xl font-extrabold text-[#F0E491]" id="current-points">0</span>
             </div>
         </div>
 
+        <!-- Selected Item Display -->
+        <div id="selected-item-display" class="selected-item-box bg-[rgba(101,140,88,0.2)] border border-[rgba(240,228,145,0.3)] rounded-xl p-3.5 mb-4 text-center text-white/90 flex-shrink-0"></div>
 
-        <div id="selected-item-display" class="selected-item-box"></div>
-
-
-        <div class="tabs-nav">
-            <button class="tab-btn active" onclick="switchTab('learning')">
+        <!-- Tabs Navigation -->
+        <div class="tabs-nav flex gap-2 mb-4 pb-3 border-b border-[rgba(240,228,145,0.2)] flex-wrap justify-center flex-shrink-0 overflow-x-auto">
+            <button class="tab-btn bg-transparent border-none text-white/60 py-2 px-3.5 text-sm font-semibold cursor-pointer transition-all duration-300 border-b-2 border-transparent flex items-center gap-1.5 whitespace-nowrap hover:text-[#F0E491] active:text-[#F0E491] active:border-b-[#F0E491]" onclick="switchTab('learning')">
                 <span>📚</span> Học tập
             </button>
-            <button class="tab-btn" onclick="switchTab('inventory')">
+            <button class="tab-btn bg-transparent border-none text-white/60 py-2 px-3.5 text-sm font-semibold cursor-pointer transition-all duration-300 border-b-2 border-transparent flex items-center gap-1.5 whitespace-nowrap hover:text-[#F0E491]" onclick="switchTab('inventory')">
                 <span>👑</span> Danh hiệu
             </button>
-            <button class="tab-btn" onclick="switchTab('shop')">
+            <button class="tab-btn bg-transparent border-none text-white/60 py-2 px-3.5 text-sm font-semibold cursor-pointer transition-all duration-300 border-b-2 border-transparent flex items-center gap-1.5 whitespace-nowrap hover:text-[#F0E491]" onclick="switchTab('shop')">
                 <span>🛍️</span> Cửa hàng
             </button>
-            <button class="tab-btn" onclick="switchTab('ranking')">
+            <button class="tab-btn bg-transparent border-none text-white/60 py-2 px-3.5 text-sm font-semibold cursor-pointer transition-all duration-300 border-b-2 border-transparent flex items-center gap-1.5 whitespace-nowrap hover:text-[#F0E491]" onclick="switchTab('ranking')">
                 <span>🏆</span> Xếp hạng
             </button>
-            <button class="tab-btn" onclick="switchTab('settings')">
+            <button class="tab-btn bg-transparent border-none text-white/60 py-2 px-3.5 text-sm font-semibold cursor-pointer transition-all duration-300 border-b-2 border-transparent flex items-center gap-1.5 whitespace-nowrap hover:text-[#F0E491]" onclick="switchTab('settings')">
                 <span>⚙️</span> Cài đặt
             </button>
         </div>
 
-
-        <div id="learning" class="tab-pane active">
-            <div class="learning-grid">
-                <div class="mode-button study-btn" onclick="navigateToStudy()">
-                    <span class="mode-icon">📖</span>
-                    <h3>Chế độ học tập</h3>
-                    <p>Học chi tiết từng bước với AI</p>
-                    <span class="cta">Bắt đầu →</span>
+        <!-- Tab Panes -->
+        <div id="learning" class="tab-pane flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div class="learning-grid grid grid-cols-1 md:grid-cols-2 gap-5 p-0 h-full items-stretch">
+                <div class="mode-button study-btn bg-gradient-to-br from-[rgba(76,175,80,0.1)] to-[rgba(101,140,88,0.15)] border border-[rgba(240,228,145,0.25)] rounded-3xl p-6 text-center cursor-pointer transition-all duration-300 text-white flex flex-col gap-2.5 overflow-visible relative justify-center hover:border-[rgba(240,228,145,0.5)] hover:shadow-[0_12px_32px_rgba(240,228,145,0.25)] hover:bg-gradient-to-br hover:from-[rgba(76,175,80,0.2)] hover:to-[rgba(101,140,88,0.25)]" onclick="navigateToStudy()">
+                    <span class="mode-icon text-5xl">📖</span>
+                    <h3 class="text-lg font-bold m-0 text-white">Chế độ học tập</h3>
+                    <p class="text-sm text-white/85 m-0">Học chi tiết từng bước với AI</p>
+                    <span class="cta text-sm text-[#F0E491] font-semibold mt-0.5">Bắt đầu →</span>
                 </div>
-                <div class="mode-button practice-btn" onclick="navigateToPractice()">
-                    <span class="mode-icon">🎮</span>
-                    <h3>Chế độ luyện tập</h3>
-                    <p>Tích lũy điểm & so sánh xếp hạng</p>
-                    <span class="cta">Bắt đầu →</span>
+                <div class="mode-button practice-btn bg-gradient-to-br from-[rgba(255,152,0,0.1)] to-[rgba(255,193,7,0.1)] border border-[rgba(240,228,145,0.25)] rounded-3xl p-6 text-center cursor-pointer transition-all duration-300 text-white flex flex-col gap-2.5 overflow-visible relative justify-center hover:border-[rgba(240,228,145,0.5)] hover:shadow-[0_12px_32px_rgba(240,228,145,0.25)] hover:bg-gradient-to-br hover:from-[rgba(255,152,0,0.2)] hover:to-[rgba(255,193,7,0.15)]" onclick="navigateToPractice()">
+                    <span class="mode-icon text-5xl">🎮</span>
+                    <h3 class="text-lg font-bold m-0 text-white">Chế độ luyện tập</h3>
+                    <p class="text-sm text-white/85 m-0">Tích lũy điểm & so sánh xếp hạng</p>
+                    <span class="cta text-sm text-[#F0E491] font-semibold mt-0.5">Bắt đầu →</span>
                 </div>
             </div>
         </div>
 
-
-        <div id="inventory" class="tab-pane">
-            <div class="section-header">
-                <h3>👑 Kho danh hiệu</h3>
-                <span id="inv-count" class="count-badge">0 danh hiệu</span>
+        <div id="inventory" class="tab-pane flex flex-col flex-1 min-h-0 overflow-hidden hidden">
+            <div class="section-header flex justify-between items-center mb-3.5 flex-shrink-0">
+                <h3 class="text-xl font-bold text-white/90 m-0">👑 Kho danh hiệu</h3>
+                <span id="inv-count" class="count-badge bg-[rgba(240,228,145,0.2)] border border-[rgba(240,228,145,0.4)] text-[#F0E491] py-1.5 px-3.5 rounded-lg font-bold text-sm">0 danh hiệu</span>
             </div>
-            <div class="scrollable-wrapper">
-                <div id="inventory-grid" class="items-grid"></div>
-                <div id="empty-inventory" class="empty-state" style="display: none;">
+            <div class="scrollable-wrapper flex-1 min-h-0 bg-[rgba(255,255,255,0.03)] border border-[rgba(240,228,145,0.15)] rounded-xl p-3 overflow-y-auto flex flex-col">
+                <div id="inventory-grid" class="items-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5"></div>
+                <div id="empty-inventory" class="empty-state hidden items-center justify-center py-5 text-white/60 text-base text-center min-h-[100px]">
                     <p>📭 Bạn chưa có danh hiệu nào</p>
                 </div>
             </div>
         </div>
 
-
-        <div id="shop" class="tab-pane">
-            <div class="section-header">
-                <h3>🛍️ Cửa hàng danh hiệu</h3>
-                <span class="user-balance">💰 <span id="shop-points">0</span> điểm</span>
+        <div id="shop" class="tab-pane flex flex-col flex-1 min-h-0 overflow-hidden hidden">
+            <div class="section-header flex justify-between items-center mb-3.5 flex-shrink-0">
+                <h3 class="text-xl font-bold text-white/90 m-0">🛍️ Cửa hàng danh hiệu</h3>
+                <span class="user-balance bg-[rgba(240,228,145,0.2)] border border-[rgba(240,228,145,0.4)] text-[#F0E491] py-1.5 px-3.5 rounded-lg font-bold text-sm">💰 <span id="shop-points">0</span> điểm</span>
             </div>
-            <div class="scrollable-wrapper">
-                <div id="items-grid" class="items-grid"></div>
+            <div class="scrollable-wrapper flex-1 min-h-0 bg-[rgba(255,255,255,0.03)] border border-[rgba(240,228,145,0.15)] rounded-xl p-3 overflow-y-auto flex flex-col">
+                <div id="items-grid" class="items-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5"></div>
+            </div>
+        </div>
+
+        <div id="ranking" class="tab-pane flex flex-col flex-1 min-h-0 overflow-hidden hidden">
+            <div class="section-header flex justify-between items-center mb-3.5 flex-shrink-0">
+                <h3 class="text-xl font-bold text-white/90 m-0">🏆 Bảng xếp hạng toàn cộng đồng</h3>
+            </div>
+            
+            <!-- User Rank Display -->
+            <div id="user-rank-box" class="user-rank-display bg-gradient-to-r from-[rgba(42,71,56,0.8)] to-[rgba(58,95,76,0.8)] border border-[#F0E491] shadow-[0_4px_12px_rgba(0,0,0,0.2)] z-10 mb-2.5 rounded-xl flex-shrink-0">
+                <!-- User rank will be populated by JavaScript -->
+            </div>
+            
+            <div class="scrollable-wrapper ranking-scroll flex-1 min-h-0 overflow-y-auto flex flex-col">
+                <div id="rankList" class="rank-list flex flex-col gap-1 pb-1"></div>
             </div>
         </div>
 
-
-        <div id="ranking" class="tab-pane">
-            <div class="section-header">
-                <h3>🏆 Bảng xếp hạng toàn cộng đồng</h3>
+        <div id="settings" class="tab-pane flex flex-col flex-1 min-h-0 overflow-hidden hidden">
+            <div class="section-header flex justify-between items-center mb-3.5 flex-shrink-0">
+                <h3 class="text-xl font-bold text-white/90 m-0">⚙️ Cài đặt tài khoản</h3>
             </div>
-
-
-            <div id="user-rank-box" class="user-rank-display">
-                <div class="rank-row user-rank">
-                    <span class="rank-col rank-number">-</span>
-                    <span class="rank-col rank-name">Bạn</span>
-                    <span class="rank-col rank-title">-</span>
-                    <span class="rank-col rank-points">0</span>
+            <div class="scrollable-wrapper flex-1 min-h-0 bg-[rgba(255,255,255,0.03)] border border-[rgba(240,228,145,0.15)] rounded-xl p-5 overflow-y-auto flex flex-col">
+                <div class="setting-field mb-5 flex flex-col gap-2">
+                    <label for="NewPassword" class="text-sm font-semibold text-[#F0E491] block mb-1">Mật khẩu mới</label>
+                    <input type="password" name="Newpassword" id="NewPassword" placeholder="Nhập mật khẩu mới" class="w-full py-3 px-3.5 rounded-lg bg-[rgba(255,255,255,0.1)] border border-[rgba(240,228,145,0.3)] text-white text-base transition-all duration-300 outline-none focus:border-[#F0E491] focus:shadow-[0_0_0_3px_rgba(240,228,145,0.2)] focus:bg-[rgba(255,255,255,0.15)]">
                 </div>
-            </div>
-
-
-            <div class="scrollable-wrapper ranking-scroll">
-                <div id="rankList" class="rank-list"></div>
-            </div>
-        </div>
-        <div id="settings" class="tab-pane">
-            <div class="section-header">
-                <h3>⚙️ Cài đặt tài khoản</h3>
-            </div>
-            <div class="scrollable-wrapper">
-                <div class="setting-field">
-                    <label for="NewPassword">Mật khẩu mới</label>
-                    <input type="password" name="Newpassword" id="NewPassword" placeholder="Nhập mật khẩu mới">
+                <div class="setting-field mb-5 flex flex-col gap-2">
+                    <label for="RepeatPassword" class="text-sm font-semibold text-[#F0E491] block mb-1">Nhập lại mật khẩu mới</label>
+                    <input type="password" name="repeatPassword" id="RepeatPassword" placeholder="Nhập lại mật khẩu mới" class="w-full py-3 px-3.5 rounded-lg bg-[rgba(255,255,255,0.1)] border border-[rgba(240,228,145,0.3)] text-white text-base transition-all duration-300 outline-none focus:border-[#F0E491] focus:shadow-[0_0_0_3px_rgba(240,228,145,0.2)] focus:bg-[rgba(255,255,255,0.15)]">
                 </div>
-                <div class="setting-field">
-                    <label for="RepeatPassword">Nhập lại mật khẩu mới</label>
-                    <input type="password" name="repeatPassword" id="RepeatPassword" placeholder="Nhập lại mật khẩu mới">
+                <div class="setting-field mb-5 flex flex-col gap-2">
+                    <label for="CurrentPassword" class="text-sm font-semibold text-[#F0E491] block mb-1">Mật khẩu hiện tại</label>
+                    <input type="password" name="CurrentPassword" id="CurrentPassword" placeholder="Nhập mật khẩu hiện tại" class="w-full py-3 px-3.5 rounded-lg bg-[rgba(255,255,255,0.1)] border border-[rgba(240,228,145,0.3)] text-white text-base transition-all duration-300 outline-none focus:border-[#F0E491] focus:shadow-[0_0_0_3px_rgba(240,228,145,0.2)] focus:bg-[rgba(255,255,255,0.15)]">
                 </div>
-                <div class="setting-field">
-                    <label for="CurrentPassword">Mật khẩu hiện tại</label>
-                    <input type="password" name="CurrentPassword" id="CurrentPassword" placeholder="Nhập mật khẩu hiện tại">
-                </div>
-                <button class="modal-btn modal-btn-confirm" style="margin-top: 20px;" onclick="SubmitAccountChanges()">
+                <button class="modal-btn modal-btn-confirm bg-gradient-to-r from-[#4caf50] to-[#81c784] text-white border-none py-3 px-5 rounded-lg font-semibold text-base cursor-pointer transition-all duration-300 mt-5 hover:shadow-[0_6px_16px_rgba(76,175,80,0.35)] hover:bg-gradient-to-r hover:from-[#45a049] hover:to-[#7ac97d] w-auto self-start min-w-[200px]" onclick="SubmitAccountChanges()">
                     ✅ Lưu thay đổi
                 </button>
                 
-                <hr style="margin-top: 30px; border-color: rgba(240, 228, 145, 0.2);">
+                <hr class="mt-7 border-[rgba(240,228,145,0.2)]">
                 
-                <button class="logout-btn" onclick="logout()">
+                <button class="logout-btn block mx-auto mt-7 bg-gradient-to-r from-[#f44336] to-[#e91e63] text-white border-none py-3 px-9 rounded-xl font-semibold text-base cursor-pointer transition-all duration-300 flex-shrink-0 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(244,67,54,0.35)]" onclick="logout()">
                     🚪 Đăng xuất khỏi tài khoản
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Notification Modal -->
+<div id="notification-modal" class="notification-modal fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-70 bg-gradient-to-br from-[rgba(42,71,56,0.98)] to-[rgba(58,95,76,0.98)] border-2 border-[rgba(240,228,145,0.6)] backdrop-blur-3xl rounded-3xl p-10 shadow-[0_0_80px_rgba(240,228,145,0.4),0_20px_60px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.1)] z-[9999] opacity-0 transition-all duration-400 pointer-events-none min-w-[320px] hidden">
+    <div class="modal-content flex flex-col items-center gap-4 text-center">
+        <span class="modal-icon text-5xl">✅</span>
+        <p class="modal-message text-lg font-bold text-white/95 m-0 tracking-wide"></p>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="confirm-modal fixed top-0 left-0 w-full h-full z-[9998] items-center justify-center opacity-0 transition-opacity duration-300 hidden">
+    <div class="modal-overlay absolute top-0 left-0 w-full h-full bg-black/50 cursor-pointer" onclick="closeConfirmModal()"></div>
+    <div class="modal-dialog relative bg-gradient-to-br from-[rgba(42,71,56,0.98)] to-[rgba(58,95,76,0.98)] border-2 border-[rgba(240,228,145,0.5)] rounded-2xl min-w-[360px] max-w-[480px] shadow-[0_0_60px_rgba(240,228,145,0.3),0_20px_60px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-3xl animate-[slideIn_0.3s_ease]">
+        <div class="modal-header flex items-center gap-3 p-6 border-b border-[rgba(240,228,145,0.2)] relative">
+            <span class="modal-title-icon text-2xl">🛍️</span>
+            <h3 class="modal-title flex-1 text-xl font-bold text-white m-0">Xác nhận mua danh hiệu</h3>
+            <button class="modal-close bg-transparent border-none text-white/60 text-2xl cursor-pointer transition-colors duration-200 w-8 h-8 flex items-center justify-center hover:text-white/90" onclick="closeConfirmModal()">✕</button>
+        </div>
+        <div class="modal-body p-6">
+            <p class="modal-item-name text-lg font-bold text-[#F0E491] m-0 mb-2"></p>
+            <p class="modal-item-price text-base text-white/80 m-0 mb-4"></p>
+            <p class="modal-question text-sm text-white/70 m-0">Bạn có chắc muốn mua danh hiệu này?</p>
+        </div>
+        <div class="modal-footer flex gap-3 p-6 border-t border-[rgba(240,228,145,0.2)]">
+            <button class="modal-btn modal-btn-cancel flex-1 py-3 px-5 rounded-lg border-none font-semibold text-base cursor-pointer transition-all duration-300 bg-[rgba(255,255,255,0.1)] text-white/70 border border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.15)] hover:text-white/90" onclick="closeConfirmModal()">Hủy</button>
+            <button class="modal-btn modal-btn-confirm flex-1 py-3 px-5 rounded-lg border-none font-semibold text-base cursor-pointer transition-all duration-300 bg-gradient-to-r from-[#4caf50] to-[#81c784] text-white hover:shadow-[0_6px_16px_rgba(76,175,80,0.35)] hover:bg-gradient-to-r hover:from-[#45a049] hover:to-[#7ac97d]" onclick="confirmPurchase()">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Background styles */
+    body {
+        background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
+        position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(240, 228, 145, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(101, 140, 88, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Custom animations */
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(50px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes bounceIcon {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+    }
+    
+    @keyframes shakeIcon {
+        0%, 100% { transform: rotateZ(0deg); }
+        25% { transform: rotateZ(-5deg); }
+        75% { transform: rotateZ(5deg); }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Active tab styles */
+    .tab-pane.active { 
+        display: flex !important; 
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .tab-btn.active { 
+        color: #F0E491 !important; 
+        border-bottom-color: #F0E491 !important; 
+    }
+    
+    /* Item card styles */
+    .item-card { 
+        background: rgba(255, 255, 255, 0.05);
+        border: 1.5px solid rgba(240, 228, 145, 0.2);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        transition: all 0.3s ease;
+        color: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        position: relative;
+    }
+    
+    .item-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(240, 228, 145, 0.5);
+        background: rgba(101, 140, 88, 0.2);
+        box-shadow: 0 10px 24px rgba(240, 228, 145, 0.12);
+    }
+    
+    .inventory-item.selected {
+        background: rgba(240, 228, 145, 0.15);
+        border-color: rgba(240, 228, 145, 0.5);
+        box-shadow: 0 6px 18px rgba(240, 228, 145, 0.2);
+    }
+    
+    .item-icon { font-size: 2.4rem; }
+    .item-name { font-size: 0.9rem; font-weight: 700; color: #ffffff; }
+    .item-price { font-size: 0.8rem; color: rgba(255, 255, 255, 0.7); }
+    
+    .buy-status {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 6px;
+        margin-top: auto;
+    }
+    
+    .available-status {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4caf50;
+        border: 1px solid rgba(76, 175, 80, 0.4);
+    }
+    
+    .owned-status {
+        background: rgba(100, 181, 246, 0.2);
+        color: #64b5f6;
+        border: 1px solid rgba(100, 181, 246, 0.4);
+    }
+    
+    .disabled-status {
+        background: rgba(244, 67, 54, 0.2);
+        color: #f44336;
+        border: 1px solid rgba(244, 67, 54, 0.4);
+    }
+    
+    .item-badge-small {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: #4caf50;
+        color: white;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+    }
+    
+    /* Rank row styles */
+    .rank-row {
+        display: grid;
+        grid-template-columns: 75px 1fr 200px 110px;
+        gap: 14px;
+        align-items: center;
+        padding: 13px 18px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .rank-row.rank-first {
+        background: linear-gradient(90deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 215, 0, 0.05) 100%);
+        border-bottom: 1px solid rgba(240, 228, 145, 0.2);
+    }
+    
+    .rank-row.rank-second {
+        background: rgba(192, 192, 192, 0.1);
+        border-bottom: 1px solid rgba(240, 228, 145, 0.2);
+    }
+    
+    .rank-row.rank-third {
+        background: rgba(205, 127, 50, 0.1);
+        border-bottom: 1px solid rgba(240, 228, 145, 0.2);
+    }
+    
+    .rank-row.user-rank {
+        background: transparent;
+        font-weight: 600;
+        color: #F0E491;
+    }
+    
+    .rank-col {
+        display: flex;
+        align-items: center;
+    }
+    
+    .rank-number {
+        text-align: center;
+        color: #F0E491;
+        font-weight: 800;
+        font-size: 1rem;
+    }
+    
+    .rank-name {
+        color: rgba(255, 255, 255, 0.9);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: 600;
+    }
+    
+    .rank-title {
+        text-align: center;
+    }
+    
+    .rank-points {
+        text-align: right;
+        color: #F0E491;
+        font-weight: 800;
+        font-size: 1.05rem;
+    }
+    
+    .title-badge {
+        display: inline-block;
+        padding: 5px 14px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        min-width: 130px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .title-badge.item1 {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    }
+    
+    .title-badge.item2 {
+        background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+    }
+    
+    .title-badge.item3 {
+        background: linear-gradient(135deg, #45b7d1, #96c93d);
+        box-shadow: 0 2px 8px rgba(69, 183, 209, 0.3);
+    }
+    
+    .title-badge.item4 {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        box-shadow: 0 2px 8px rgba(240, 147, 251, 0.3);
+    }
+    
+    .title-badge.item5 {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+    }
+    
+    .title-badge.none {
+        background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        opacity: 0.75;
+    }
+    
+    /* Selected item display */
+    .active-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+    
+    .item-badge-inline {
+        display: inline-block;
+        background: linear-gradient(90deg, #F0E491, #BBC863);
+        color: #2a4738;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3);
+    }
+    
+    .item-desc {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .no-item {
+        padding: 12px;
+        opacity: 0.8;
+    }
+    
+    /* Scrollbar styles */
+    .tabs-nav::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .tabs-nav::-webkit-scrollbar-thumb {
+        background: rgba(240, 228, 145, 0.3);
+        border-radius: 2px;
+    }
+    
+    .scrollable-wrapper::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .scrollable-wrapper::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    
+    .scrollable-wrapper::-webkit-scrollbar-thumb {
+        background: rgba(240, 228, 145, 0.3);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+    
+    .scrollable-wrapper::-webkit-scrollbar-thumb:hover {
+        background: rgba(240, 228, 145, 0.5);
+    }
+    
+    /* Modal states */
+    .notification-modal.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        pointer-events: auto;
+    }
+    
+    .notification-modal.error {
+        border-color: rgba(244, 67, 54, 0.6);
+    }
+    
+    .notification-modal.error .modal-icon {
+        animation: shakeIcon 0.6s ease;
+    }
+    
+    .confirm-modal.show {
+        opacity: 1;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1200px) {
+        .home-card { padding: 3rem 2.5rem; max-width: 98%; }
+        .rank-row { grid-template-columns: 70px 1fr 180px 100px; }
+        .learning-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    }
+    
+    @media (max-width: 1024px) {
+        .home-card { padding: 2.75rem 2.25rem; max-width: 98%; }
+        .rank-row { grid-template-columns: 65px 1fr 160px 90px; gap: 10px; padding: 11px 14px; }
+        .title-badge { min-width: 110px; font-size: 0.7rem; }
+        .mode-button { padding: 20px 16px; }
+        .mode-icon { font-size: 2.8rem; }
+        .mode-button h3 { font-size: 1rem; }
+        .mode-button p { font-size: 0.8rem; }
+    }
+    
+    @media (max-width: 768px) {
+        .home-card { padding: 2.5rem 1.5rem; max-width: 95%; }
+        .user-header h1 { font-size: 2rem; }
+        .learning-grid { grid-template-columns: 1fr; gap: 14px; }
+        .items-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        .rank-row { grid-template-columns: 55px 1fr 130px 80px; gap: 8px; padding: 10px 12px; }
+        .title-badge { min-width: 100px; font-size: 0.65rem; padding: 4px 10px; }
+        .notification-modal { min-width: 280px; padding: 2rem 2.5rem; }
+        .modal-dialog { min-width: 320px; max-width: 90vw; }
+        .mode-button { padding: 18px 14px; }
+        .mode-icon { font-size: 2.4rem; }
+    }
+    
+    @media (max-width: 480px) {
+        .home-card { padding: 2rem 1rem; max-height: 92vh; }
+        .user-header h1 { font-size: 1.6rem; }
+        .stat-value { font-size: 1.4rem; }
+        .items-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .rank-row { grid-template-columns: 50px 1fr 100px 70px; padding: 9px 10px; font-size: 0.9em; }
+        .title-badge { min-width: 80px; font-size: 0.6rem; padding: 3px 8px; }
+        .notification-modal { min-width: 260px; padding: 1.75rem 2rem; }
+        .modal-icon { font-size: 2.8rem; }
+        .modal-message { font-size: 1rem; }
+        .modal-dialog { min-width: 280px; }
+        .modal-header { padding: 1rem; }
+        .modal-body { padding: 1rem; }
+        .modal-footer { padding: 1rem; }
+        .mode-button { padding: 1rem 0.75rem; }
+        .mode-icon { font-size: 2rem; }
+        .mode-button h3 { font-size: 0.95rem; }
+        .mode-button p { font-size: 0.75rem; }
+        .cta { font-size: 0.85rem; }
+        .setting-field input[type="password"] { padding: 10px 12px; font-size: 0.95rem; }
+    }
+</style>
+
+<script>
+// Initialize first tab as active when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Set learning tab as active by default
+    switchTab('learning');
+});
+</script>
 {% endblock %}
 {% block linkjs %}
 <script src="{{ url_for('static', filename='js/home.js') }}"></script>
