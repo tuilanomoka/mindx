@@ -251,7 +251,8 @@ class QuestionManager {
 
         const stepsHTML = questionData.loigiai.map((step, index) => {
             const stepNumber = step.buoc || index + 1;
-            const stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
+            let stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
+            stepDetail = stepDetail.replace('\x0c', '\\f');
             return `
                 <div id="step-${index + 1}" class="step">
                     <a href="javascript:void(0);" class="step-link" data-step="${index}">
@@ -279,7 +280,7 @@ class QuestionManager {
                    🏳️ Tôi bỏ cuộc - Xem đáp án cuối cùng (0 điểm)
                 </a>
                 <div id="final-answer-content" class="hidden">
-                    Đáp án: ${questionData.dapan}
+                    Đáp án: ${questionData.dapan.replace('\x0c', '\\f')}
                 </div>
             </div>
         `;
@@ -377,6 +378,7 @@ class QuestionManager {
             explain = 'Không có giải thích chi tiết.';
         } else {
             explain = explain.replace(/\\n/g, '<br>');
+            explain = explain.replace('\x0c', '\\f');
         }
 
         resultDiv.innerHTML = `

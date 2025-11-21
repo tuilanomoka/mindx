@@ -16,7 +16,10 @@ QUY TẮC:
   "dapan": "Ngoài phạm vi kiến thức"
 }
 - Không được dùng markdown, chỉ dùng latex với kí hiệu $, các text khác thì vẫn ghi như bình thưởng.
-
+- Nếu đáp án có biểu thức latex, ta phải bỏ biểu thức latex đó trong $ LATEX $.
+- Trong bước giải, dùng ít lần xuống dòng nhất có thể.
+- Latex không nên xuống dòng nhiều quá. 
+- Khi có biểu thức mathjax, đặc nó trong span như <span>$LATEX$</span>
 BÀI TOÁN:
 Lớp: {lop}
 Câu hỏi: {question}

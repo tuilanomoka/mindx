@@ -127,11 +127,11 @@ function processAndDisplayData(data) {
             
             // Xử lý inline latex với $ (giữ nguyên $ mà không bị xuống dòng)
             stepDetail = stepDetail.replace(/\$(.*?)\$/g, '\\($1\\)');
-
+            stepDetail = stepDetail.replace('\x0c', '\\f');
             stepsHTML += `
                 <div class="step">
                     <h4>Bước ${stepNumber}</h4>
-                    <div class="step-content">${stepDetail}</div>
+                    <div class="step-content"><p>${stepDetail}</p></div>
                 </div>
             `;
         });
@@ -142,7 +142,7 @@ function processAndDisplayData(data) {
             let finalAns = questionData.dapan.replace(/\\n/g, '<br>');
             // Xử lý latex trong đáp án
             finalAns = finalAns.replace(/\$(.*?)\$/g, '\\($1\\)');
-            
+            finalAns = finalAns.replace('\x0c', '\\f');
             solveDiv.innerHTML += `
                 <div class="answer-section">
                     <h3>Đáp án:</h3>

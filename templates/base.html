@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>MindX</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
@@ -84,12 +85,13 @@
     {% block linkcss %}
     {% endblock %}
 </head>
+
 <body class="bg-slate-900">
     <div class="bg-animation"></div>
-    
+
     {% block content %}
     {% endblock %}
-    
+
     {% block linkjs %}
     {% endblock %}
     <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
@@ -101,14 +103,21 @@
                 processEscapes: true,
                 tags: 'ams'
             },
+            chtml: {
+                displayAlign: 'center',
+                displayIndent: '0em',
+                linebreaks: { automatic: true, width: "container" }
+            },
             svg: {
-                fontCache: 'global'
+                fontCache: 'global',
+                linebreaks: { width: "container" }
             }
         };
     </script>
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
+        </script>
     <script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
 </body>
+
 </html>
