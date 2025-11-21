@@ -35,7 +35,7 @@
                         <option value="10">Lớp 10</option>
                         <option value="11">Lớp 11</option>
                         <option value="12">Lớp 12</option>
-			<option value="Không giới hạn">Không giới hạn</option>
+                        <option value="Không giới hạn">Không giới hạn</option>
                     </select>
                 </div>
             </div>
@@ -43,15 +43,14 @@
             <div class="form-group">
                 <label for="question" class="input-label">✍️ Nhập đề bài toán</label>
                 <div class="math-input-container">
-                    <math-field 
-                        virtual-keyboard-mode="onfocus" 
-                        smart-fence 
-                        id="question" 
-                        name="question"
+                    <math-field virtual-keyboard-mode="onfocus" smart-fence id="question" name="question"
                         class="custom-math-field"
-                        placeholder="Nhập biểu thức toán học (ví dụ: 2x + 5 = 10)..."
-                    ></math-field>
+                        placeholder="Nhập biểu thức toán học (ví dụ: 2x + 5 = 10)..."></math-field>
                 </div>
+            </div>
+            <div class="upload-file-group">
+                <button id="openFile" class="primary-btn">Upload File</button>
+                <input type="file" id="fileInput" style="display:none">
             </div>
 
             <div class="action-area">
@@ -62,7 +61,7 @@
         </div>
 
         <div id="hiddenSection" class="hidden solving-section">
-            
+
             <div class="score-board">
                 <span class="score-icon">⭐</span>
                 <p id="grade">Điểm hiện tại: 100</p>
@@ -76,19 +75,14 @@
             <div class="steps-container">
                 <div class="section-badge">Hướng dẫn giải (Click để mở gợi ý - Sẽ bị trừ điểm)</div>
                 <div id="solve" class="steps-list">
-                    </div>
+                </div>
             </div>
 
             <div class="answer-input-section">
                 <label for="user-answer" class="input-label">✨ Câu trả lời của bạn</label>
                 <div class="math-input-container answer-field-wrapper">
-                    <math-field 
-                        virtual-keyboard-mode="onfocus" 
-                        smart-fence 
-                        id="user-answer" 
-                        class="custom-math-field"
-                        placeholder="Nhập đáp án cuối cùng..."
-                    ></math-field>
+                    <math-field virtual-keyboard-mode="onfocus" smart-fence id="user-answer" class="custom-math-field"
+                        placeholder="Nhập đáp án cuối cùng..."></math-field>
                 </div>
                 <button type="button" onclick="submitAnswer()" class="submit-answer-btn">
                     Gửi câu trả lời
@@ -102,6 +96,6 @@
 {% endblock %}
 
 {% block linkjs %}
-    <script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
-    <script src="{{ url_for('static', filename='js/practice.js') }}"></script>
+<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
+<script src="{{ url_for('static', filename='js/practice.js') }}"></script>
 {% endblock %}
