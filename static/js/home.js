@@ -275,22 +275,35 @@ class HomePage {
         if (!this.currentPurchaseItem) return;
         
         const modal = document.getElementById('confirm-modal');
-        const itemName = document.querySelector('.modal-item-name');
-        const itemPrice = document.querySelector('.modal-item-price');
+        const modalDialog = modal.querySelector('.modal-dialog');
+        const itemName = modal.querySelector('.modal-item-name');
+        const itemPrice = modal.querySelector('.modal-item-price');
         
         if (modal && itemName && itemPrice) {
             itemName.textContent = this.currentPurchaseItem.name;
             itemPrice.textContent = `💰 ${this.currentPurchaseItem.price} điểm`;
+            
             modal.classList.remove('hidden');
-            setTimeout(() => modal.classList.add('show'), 10);
+            setTimeout(() => {
+                modal.classList.add('show');
+                modalDialog.style.transform = 'translateY(0)';
+                modalDialog.style.opacity = '1';
+            }, 10);
         }
     }
 
     closeConfirmModal() {
         const modal = document.getElementById('confirm-modal');
+        const modalDialog = modal.querySelector('.modal-dialog');
+        
         if (modal) {
             modal.classList.remove('show');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            modalDialog.style.transform = 'translateY(-20px)';
+            modalDialog.style.opacity = '0';
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
     }
 
@@ -417,8 +430,36 @@ class HomePage {
 }
 
 // Global functions for onclick handlers
+// Global functions for onclick handlers
 function switchTab(tabName) {
-    homePage.switchTab(tabName);
+    // Kiểm tra homePage đã được khởi tạo chưa
+    if (window.homePage && typeof window.homePage.switchTab === 'function') {
+        window.homePage.switchTab(tabName);
+    } else {
+        // Fallback: xử lý tab cơ bản nếu homePage chưa sẵn sàng
+        console.log('HomePage chưa sẵn sàng, sử dụng fallback tab switching');
+        
+        // Ẩn tất cả tab panes
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.add('hidden');
+            pane.classList.remove('active');
+        });
+        
+        // Bỏ active tất cả tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Hiển thị tab được chọn
+        const pane = document.getElementById(tabName);
+        const btn = document.querySelector(`[onclick*="switchTab('${tabName}')"]`);
+        
+        if (pane) {
+            pane.classList.remove('hidden');
+            pane.classList.add('active');
+        }
+        if (btn) btn.classList.add('active');
+    }
 }
 
 function navigateToStudy() {

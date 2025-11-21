@@ -1,7 +1,435 @@
 {% extends "base.html" %}
 {% block linkcss %}
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
-<link rel="stylesheet" href="{{ url_for('static', filename='css/practice.css') }}">
+<style type="text/tailwindcss">
+    @layer base {
+        html, body {
+            height: auto !important;
+            min-height: 100vh;
+            overflow-y: auto !important;
+            background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(240, 228, 145, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(101, 140, 88, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+    }
+
+    @layer components {
+        .practice-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+            height: auto !important;
+        }
+
+        .practice-card {
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(42, 71, 56, 0.95) 0%, rgba(58, 95, 76, 0.95) 100%);
+            border: 2px solid rgba(240, 228, 145, 0.5);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 0 80px rgba(240, 228, 145, 0.15), 0 20px 60px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: slideUp 0.6s ease-out;
+            color: #fff;
+            height: auto;
+            max-height: none;
+        }
+
+        .practice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(240, 228, 145, 0.2);
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        .header-title { 
+            text-align: center; 
+        }
+        
+        .header-title h1 {
+            font-size: 1.8rem;
+            color: #F0E491;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        
+        .tagline {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #F0E491;
+        }
+        
+        .header-spacer { 
+            width: 80px; 
+        }
+
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #F0E491;
+            font-size: 1rem;
+        }
+
+        .select-wrapper {
+            position: relative;
+            max-width: 200px;
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1.5px solid rgba(240, 228, 145, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            transition: all 0.3s;
+        }
+        
+        .custom-select:focus {
+            border-color: #F0E491;
+            box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
+        }
+
+        .math-input-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1.5px solid rgba(240, 228, 145, 0.3);
+            border-radius: 12px;
+            padding: 4px;
+            transition: all 0.3s;
+        }
+        
+        .math-input-container:focus-within {
+            border-color: #F0E491;
+            box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        math-field {
+            width: 100%;
+            background: transparent;
+            color: white;
+            font-size: 1.2rem;
+            padding: 10px;
+            --caret-color: #F0E491;
+            --selection-background-color: rgba(240, 228, 145, 0.3);
+            --selection-color: white;
+            border: none;
+            outline: none;
+        }
+        
+        math-field::part(container) {
+            border: none;
+            background: transparent;
+        }
+
+        .primary-btn, .submit-answer-btn {
+            background: linear-gradient(90deg, #F0E491, #BBC863);
+            color: #1a3a28;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3);
+        }
+
+        .primary-btn:hover, .submit-answer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(240, 228, 145, 0.4);
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
+        .solving-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeIn 0.5s;
+        }
+
+        .score-board {
+            background: rgba(101, 140, 88, 0.3);
+            border: 1px solid rgba(240, 228, 145, 0.5);
+            padding: 12px 24px;
+            border-radius: 50px;
+            align-self: center;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            color: #F0E491;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .section-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .problem-display {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px dashed rgba(255, 255, 255, 0.3);
+        }
+        
+        .math-content { 
+            font-size: 1.4rem; 
+            color: white; 
+        }
+
+        .steps-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+
+        .step {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .step-link {
+            display: block;
+            padding: 16px 20px;
+            color: #64b5f6;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .step-link:hover {
+            background: rgba(0,0,0,0.4);
+            color: #90caf9;
+        }
+
+        .step-content {
+            padding: 20px;
+            color: #e2e8f0;
+            line-height: 1.6;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            animation: expand 0.4s ease;
+        }
+
+        .answer-section { 
+            margin-top: 10px; 
+        }
+        
+        #final-answer-link {
+            display: block;
+            text-align: center;
+            background: rgba(244, 67, 54, 0.15);
+            color: #ff8a80;
+            padding: 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            border: 1px dashed rgba(244, 67, 54, 0.4);
+            transition: all 0.3s;
+        }
+        
+        #final-answer-link:hover {
+            background: rgba(244, 67, 54, 0.25);
+            transform: scale(0.99);
+        }
+        
+        #final-answer-content {
+            background: rgba(76, 175, 80, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            color: #a5d6a7;
+            text-align: center;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            animation: slideUp 0.3s;
+        }
+        
+        .result.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #e8f5e9;
+        }
+        
+        .result.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #ffebee;
+        }
+
+        .loading-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(42, 71, 56, 0.95);
+            border: 1px solid rgba(240, 228, 145, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .spinner-icon {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #F0E491;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-text {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .btn-continue {
+            background: linear-gradient(90deg, #4caf50, #66bb6a);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+            background: linear-gradient(90deg, #43a047, #5eb363);
+        }
+    }
+
+    @layer utilities {
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes expand {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateY(20px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    }
+
+    /* Classes hidden không dùng @apply */
+    .hidden { 
+        display: none !important; 
+    }
+    
+    .step-content.hidden { 
+        display: none; 
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -48,10 +476,6 @@
                         placeholder="Nhập biểu thức toán học (ví dụ: 2x + 5 = 10)..."></math-field>
                 </div>
             </div>
-            <div class="upload-file-group">
-                <button id="openFile" class="primary-btn">Upload File</button>
-                <input type="file" id="fileInput" style="display:none">
-            </div>
 
             <div class="action-area">
                 <button type="button" onclick="submitMathQuestion()" id="submitBtn" class="primary-btn">
@@ -61,7 +485,6 @@
         </div>
 
         <div id="hiddenSection" class="hidden solving-section">
-
             <div class="score-board">
                 <span class="score-icon">⭐</span>
                 <p id="grade">Điểm hiện tại: 100</p>
@@ -96,6 +519,5 @@
 {% endblock %}
 
 {% block linkjs %}
-<script src="https://unpkg.com/mathlive/dist/mathlive.min.js"></script>
 <script src="{{ url_for('static', filename='js/practice.js') }}"></script>
 {% endblock %}

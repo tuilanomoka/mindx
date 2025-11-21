@@ -1,7 +1,5 @@
-function showAlert(message, type = 'error') {
-    alert(message);
-}
-
+// Biến toàn cục
+let loadingElement = null;
 const practiceState = {
     sessionId: null,
     numberOfSteps: 0,
@@ -23,13 +21,13 @@ const API_CONFIG = {
     }
 };
 
+// Utility functions
 const DomUtils = {
     getElement: (id) => document.getElementById(id),
     getValue: (element) => element?.getValue?.() || element?.value || '',
     toggleVisibility: (element, show) => {
         if(!element) return;
-        if(show) element.classList.remove('hidden');
-        else element.classList.add('hidden');
+        element.classList.toggle('hidden', !show);
     },
     disableElement: (element, disabled) => element && (element.disabled = disabled),
     setButtonLoading: (button, loading, text = 'Đang xử lý...') => {
@@ -45,12 +43,9 @@ const DomUtils = {
     }
 };
 
-
-let loadingElement = null;
-
+// Loading management
 function showLoading(message = 'Đang xử lý...') {
     if (loadingElement) {
-        
         const textEl = loadingElement.querySelector('.loading-text');
         if(textEl) textEl.textContent = message;
         return;
@@ -58,12 +53,10 @@ function showLoading(message = 'Đang xử lý...') {
 
     loadingElement = document.createElement('div');
     loadingElement.className = 'loading-toast';
-    
     loadingElement.innerHTML = `
         <div class="spinner-icon"></div>
         <span class="loading-text">${message}</span>
     `;
-    
     document.body.appendChild(loadingElement);
 }
 
@@ -74,26 +67,29 @@ function hideLoading() {
         loadingElement.style.transition = 'all 0.3s ease';
         
         setTimeout(() => {
-            if (loadingElement) {
-                loadingElement.remove();
-                loadingElement = null;
-            }
+            loadingElement?.remove();
+            loadingElement = null;
         }, 300);
     }
 }
 
+function showAlert(message, type = 'error') {
+    alert(message);
+}
+
+// API Service
 class ApiService {
     static async request(endpoint, data = null, method = 'POST') {
-        
-        
         const config = {
             method,
             headers: API_CONFIG.headers,
             credentials: 'include'
         };
+        
         if (data && (method === 'POST' || method === 'PUT')) {
             config.body = JSON.stringify(data);
         }
+        
         try {
             const response = await fetch(endpoint, config);
             if (!response.ok) {
@@ -110,6 +106,7 @@ class ApiService {
     }
 }
 
+// Session Management
 class SessionManager {
     static async newSession() {
         try {
@@ -177,6 +174,7 @@ class SessionManager {
     }
 }
 
+// Question Management
 class QuestionManager {
     static async submitMathQuestion() {
         const lop = DomUtils.getValue(DomUtils.getElement('lop'));
@@ -189,14 +187,10 @@ class QuestionManager {
         if (question.length < 2) return showAlert('Câu hỏi quá ngắn.');
 
         DomUtils.setButtonLoading(submitBtn, true);
-        
-        
         showLoading('Đang suy nghĩ...');
 
         try {
             const data = await ApiService.request(API_CONFIG.endpoints.processQuestion, { lop, question });
-            
-            
             hideLoading();
 
             if (data.error) throw new Error(data.error);
@@ -234,7 +228,7 @@ class QuestionManager {
 
         const questionData = this.extractQuestionData(data);
         if (!questionData) {
-            solveDiv.innerHTML = '<p style="color:white; text-align:center">Không có dữ liệu giải bài tập.</p>';
+            solveDiv.innerHTML = '<p class="text-white text-center">Không có dữ liệu giải bài tập.</p>';
             this.renderMathJax([problemDiv, solveDiv]);
             return;
         }
@@ -250,7 +244,7 @@ class QuestionManager {
 
     static displaySolutionSteps(container, questionData) {
         if (!questionData.loigiai || !Array.isArray(questionData.loigiai)) {
-            container.innerHTML = '<p style="color:white; text-align:center">Không có lời giải chi tiết.</p>';
+            container.innerHTML = '<p class="text-white text-center">Không có lời giải chi tiết.</p>';
             return;
         }
         practiceState.numberOfSteps = questionData.loigiai.length;
@@ -272,8 +266,7 @@ class QuestionManager {
 
         container.innerHTML = stepsHTML;
         
-        const links = container.querySelectorAll('.step-link');
-        links.forEach(link => {
+        container.querySelectorAll('.step-link').forEach(link => {
             link.addEventListener('click', (e) => this.handleStepClick(e));
         });
     }
@@ -321,9 +314,7 @@ class QuestionManager {
         const btn = document.createElement('button');
         btn.className = 'btn-continue';
         btn.innerHTML = '🔄 Tiếp tục bài toán khác';
-        btn.onclick = () => {
-            window.location.reload();
-        };
+        btn.onclick = () => window.location.reload();
         container.appendChild(btn);
     }
 
@@ -352,8 +343,6 @@ class QuestionManager {
         if (!SessionManager.validateSession()) return;
 
         if(submitBtn) submitBtn.disabled = true;
-
-        
         showLoading('Đang kiểm tra câu trả lời...');
 
         try {
@@ -383,12 +372,10 @@ class QuestionManager {
         
         resultDiv.className = `result ${isCorrect ? 'correct' : 'incorrect'}`;
         
-        
         let explain = data?.explain || '';
         if (!explain || explain === 'null') {
             explain = 'Không có giải thích chi tiết.';
         } else {
-            
             explain = explain.replace(/\\n/g, '<br>');
         }
 
@@ -403,35 +390,28 @@ class QuestionManager {
             container.appendChild(resultDiv);
         }
 
-        
         setTimeout(() => {
             this.renderMathJax([resultDiv]);
             resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 50); 
+        }, 50);
 
         this.appendContinueButton(resultDiv);
     }
 
     static renderMathJax(elements) {
         const validElements = elements.filter(el => el && el instanceof HTMLElement);
-        
         if (validElements.length === 0) return;
 
-        
         if (window.MathJax && window.MathJax.typesetPromise) {
-     
             if (window.MathJax.texReset) window.MathJax.texReset();
-            
             window.MathJax.typesetPromise(validElements)
                 .catch(err => {
                     console.warn('MathJax Rendering Warning:', err);
-        
                     if (window.MathLive) {
                         validElements.forEach(el => window.MathLive.renderMathInElement(el));
                     }
                 });
         } else if (window.MathLive && window.MathLive.renderMathInElement) {
-            
             validElements.forEach(el => window.MathLive.renderMathInElement(el));
         }
     }
@@ -442,14 +422,17 @@ class QuestionManager {
     }
 }
 
+// Global functions
 function navigateToHome() {
     window.location.href = '/';
 }
 
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Practice page initialized (New Design & Loading Toast)');
+    console.log('Practice page initialized (Optimized)');
 });
 
+// Export to global scope
 window.submitMathQuestion = QuestionManager.submitMathQuestion.bind(QuestionManager);
 window.submitAnswer = QuestionManager.submitAnswer.bind(QuestionManager);
 window.navigateToHome = navigateToHome;
