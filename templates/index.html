@@ -1,31 +1,128 @@
 {% extends "base.html" %}
 {% block linkcss %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/welcome.css') }}">
 {% endblock %}
 {% block content %}
-<div class="welcome-container">
+<div class="welcome-container flex items-center justify-center w-full h-screen p-5">
     <div class="glow-wrapper">
-        <div class="welcome-card">
-            <div class="welcome-header">
-                <h1>MindX</h1>
-                <p class="tagline">Nền tảng học tập tư duy sử dụng AI</p>
+        <div class="welcome-card bg-gradient-to-br from-[#2a4738]/95 to-[#3a5f4c]/95 backdrop-blur-xl border-2 border-[#F0E491]/50 rounded-3xl p-14 text-center shadow-[0_0_80px_rgba(240,228,145,0.2),0_20px_60px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)] w-full max-w-[550px] animate-[slideUp_0.7s_ease-out]">
+            <div class="welcome-header mb-8">
+                <h1 class="text-5xl font-extrabold tracking-tight mb-3 text-white">MindX</h1>
+                <p class="tagline text-lg text-white/85 m-0 font-medium">Nền tảng học tập tư duy sử dụng AI</p>
             </div>
             
-            <div class="intro-box">
-                <div class="intro-icon">🎓</div>
-                <h3>Chào mừng bạn!</h3>
-                <p class="intro-text">MindX là nền tảng học tập tư duy tiên tiến, kết hợp sức mạnh của trí tuệ nhân tạo để giúp bạn nắm vững kiến thức toán học. Với hai chế độ học tập linh hoạt: <strong>Chế độ học tập</strong> để hiểu sâu từng bài, và <strong>Chế độ rèn luyện</strong> để nâng cao kỹ năng giải toán. Hãy bắt đầu hành trình học tập của bạn ngay hôm nay!</p>
+            <div class="intro-box bg-[#658c58]/40 border-1.5 border-[#F0E491]/35 rounded-2xl p-7 mb-8 transition-all duration-300 ease-in-out hover:bg-[#658c58]/55 hover:border-[#F0E491]/50 hover:shadow-[0_8px_32px_rgba(240,228,145,0.15)]">
+                <div class="intro-icon text-5xl mb-3 block">🎓</div>
+                <h3 class="text-xl font-bold text-white mb-3">Chào mừng bạn!</h3>
+                <p class="intro-text text-sm text-white/90 leading-relaxed m-0 text-left">
+                    MindX là nền tảng học tập tư duy tiên tiến, kết hợp sức mạnh của trí tuệ nhân tạo để giúp bạn nắm vững kiến thức toán học. Với hai chế độ học tập linh hoạt: <strong class="text-[#F0E491] font-semibold">Chế độ học tập</strong> để hiểu sâu từng bài, và <strong class="text-[#F0E491] font-semibold">Chế độ rèn luyện</strong> để nâng cao kỹ năng giải toán. Hãy bắt đầu hành trình học tập của bạn ngay hôm nay!
+                </p>
             </div>
             
-            <div class="auth-buttons-group">
-                <button class="start-button" onclick="window.location.href='/login'">Đăng nhập</button>
+            <div class="auth-buttons-group flex flex-col gap-3 mt-8">
+                <button class="start-button w-full bg-gradient-to-r from-[#F0E491] to-[#BBC863] text-[#2a4738] border-none rounded-xl py-4 px-7 font-bold text-lg cursor-pointer transition-all duration-300 ease-in-out shadow-[0_6px_20px_rgba(240,228,145,0.35),0_0_30px_rgba(240,228,145,0.15)] tracking-wide hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(240,228,145,0.45),0_0_40px_rgba(240,228,145,0.25)] hover:bg-gradient-to-r hover:from-[#BBC863] hover:to-[#F0E491] active:translate-y-0" onclick="window.location.href='/login'">
+                    Đăng nhập
+                </button>
             </div>
-            <div class="divider">hoặc</div>
             
-            <div class="form-footer" style="margin-top: 24px;">
-                Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+            <div class="divider flex items-center my-6 text-white/50 text-sm">
+                <div class="flex-1 h-px bg-[#F0E491]/20 mr-3"></div>
+                hoặc
+                <div class="flex-1 h-px bg-[#F0E491]/20 ml-3"></div>
+            </div>
+            
+            <div class="form-footer mt-6 text-sm text-white/75">
+                Chưa có tài khoản? <a href="/register" class="text-[#F0E491] no-underline font-medium transition-colors duration-300 hover:text-white hover:underline">Đăng ký ngay</a>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .welcome-container {
+        background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .welcome-card {
+            padding: 40px 32px !important;
+            max-width: 90% !important;
+        }
+        
+        .welcome-header h1 {
+            font-size: 2.5rem !important;
+        }
+        
+        .tagline {
+            font-size: 1rem !important;
+        }
+        
+        .intro-box {
+            padding: 24px 20px !important;
+        }
+        
+        .intro-icon {
+            font-size: 2.5rem !important;
+        }
+        
+        .intro-box h3 {
+            font-size: 1.2rem !important;
+        }
+        
+        .intro-text {
+            font-size: 0.9rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .welcome-container {
+            padding: 16px !important;
+        }
+        
+        .welcome-card {
+            padding: 32px 20px !important;
+        }
+        
+        .welcome-header h1 {
+            font-size: 2rem !important;
+        }
+        
+        .tagline {
+            font-size: 0.95rem !important;
+        }
+        
+        .intro-box {
+            padding: 20px 16px !important;
+            margin-bottom: 24px !important;
+        }
+        
+        .intro-icon {
+            font-size: 2rem !important;
+        }
+        
+        .intro-box h3 {
+            font-size: 1.05rem !important;
+        }
+        
+        .intro-text {
+            font-size: 0.85rem !important;
+            line-height: 1.6 !important;
+        }
+        
+        .start-button {
+            padding: 14px 24px !important;
+            font-size: 1rem !important;
+        }
+    }
+</style>
 {% endblock %}
