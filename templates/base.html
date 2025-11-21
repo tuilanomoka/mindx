@@ -3,14 +3,93 @@
 <head>
     <title>MindX</title>
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+        @layer base {
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            html, body {
+                width: 100%;
+                height: 100%;
+                color: #e2e8f0;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                overflow: hidden;
+            }
+        }
+        
+        @layer components {
+            .bg-animation {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: 
+                    linear-gradient(180deg, rgba(30, 41, 59, 0.3) 0%, transparent 50%, rgba(30, 41, 59, 0.2) 100%),
+                    linear-gradient(90deg, transparent 0%, rgba(15, 23, 42, 0.5) 50%, transparent 100%);
+                animation: subtle-shift 15s ease-in-out infinite;
+                pointer-events: none;
+                z-index: 0;
+            }
+            
+            .page {
+                display: none;
+                width: 100%;
+                height: 100%;
+                position: relative;
+                z-index: 10;
+            }
+            
+            .page.active {
+                display: flex;
+            }
+            
+            .glow-wrapper {
+                animation: glow-pulse 4s ease-in-out infinite;
+            }
+            
+            .card-header {
+                margin-bottom: 24px;
+            }
+        }
+        
+        @layer utilities {
+            @keyframes subtle-shift {
+                0%, 100% { opacity: 0.8; }
+                50% { opacity: 1; }
+            }
+            
+            @keyframes glow-pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.02); }
+            }
+            
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(40px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        }
+    </style>
     {% block linkcss %}
     {% endblock %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 </head>
-<body>
+<body class="bg-slate-900">
+    <div class="bg-animation"></div>
+    
     {% block content %}
     {% endblock %}
-</body>
+    
     {% block linkjs %}
     {% endblock %}
     <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
@@ -31,4 +110,5 @@
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
     </script>
+</body>
 </html>
