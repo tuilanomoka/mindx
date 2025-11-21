@@ -123,7 +123,7 @@ function processAndDisplayData(data) {
             let stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
             
             // Xử lý latex trong các bước - FIX LỖI XUỐNG DÒNG
-            stepDetail = stepDetail.replace(/\\n/g, '<br>');
+            stepDetail = stepDetail.replace(/\\n(?![a-zA-Z])/g, '<br>');
             
             // Xử lý inline latex với $ (giữ nguyên $ mà không bị xuống dòng)
             stepDetail = stepDetail.replace(/\$(.*?)\$/g, '\\($1\\)');
