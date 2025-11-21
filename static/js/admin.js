@@ -21,29 +21,29 @@ class AdminPanel {
         });
 
         // Search functionality
-        document.getElementById('search-users').addEventListener('input', (e) => {
+        document.getElementById('search-users')?.addEventListener('input', (e) => {
             this.filterUsers(e.target.value);
         });
 
         // Password change
-        document.getElementById('change-password-btn').addEventListener('click', () => {
+        document.getElementById('change-password-btn')?.addEventListener('click', () => {
             this.changeOwnPassword();
         });
 
-        document.getElementById('change-user-password-btn').addEventListener('click', () => {
+        document.getElementById('change-user-password-btn')?.addEventListener('click', () => {
             this.changeUserPassword();
         });
 
         // Modal events
-        document.querySelector('.close').addEventListener('click', () => {
+        document.querySelector('.close')?.addEventListener('click', () => {
             this.closeModal();
         });
 
-        document.getElementById('save-user-btn').addEventListener('click', () => {
+        document.getElementById('save-user-btn')?.addEventListener('click', () => {
             this.saveUserChanges();
         });
 
-        document.getElementById('delete-user-btn').addEventListener('click', () => {
+        document.getElementById('delete-user-btn')?.addEventListener('click', () => {
             this.deleteUser();
         });
 
@@ -61,13 +61,13 @@ class AdminPanel {
         document.querySelectorAll('.nav-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
 
         // Update content
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
-        document.getElementById(`${tabName}-tab`).classList.add('active');
+        document.getElementById(`${tabName}-tab`)?.classList.add('active');
 
         this.currentTab = tabName;
 
@@ -99,6 +99,8 @@ class AdminPanel {
 
     renderUsers(users) {
         const tbody = document.getElementById('users-table-body');
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
         users.forEach(user => {
@@ -112,13 +114,13 @@ class AdminPanel {
             const itemsText = items.length > 0 ? items.join(', ') : 'Không có';
 
             row.innerHTML = `
-                <td>${user.username}</td>
+                <td>${this.escapeHtml(user.username)}</td>
                 <td>${user.totalpoint || 0}</td>
                 <td>${user.currentpoint || 0}</td>
-                <td>${itemsText}</td>
-                <td>${user.selecteditem || 'Không có'}</td>
+                <td>${this.escapeHtml(itemsText)}</td>
+                <td>${this.escapeHtml(user.selecteditem || 'Không có')}</td>
                 <td>
-                    <button class="btn btn-primary btn-sm edit-btn" data-username="${user.username}">
+                    <button class="btn btn-primary btn-sm edit-btn" data-username="${this.escapeHtml(user.username)}">
                         <i class="fas fa-edit"></i> Sửa
                     </button>
                 </td>
@@ -151,7 +153,7 @@ class AdminPanel {
         document.getElementById('edit-total-points').value = user.totalpoint || 0;
         document.getElementById('edit-current-points').value = user.currentpoint || 0;
 
-        document.getElementById('edit-user-modal').style.display = 'block';
+        document.getElementById('edit-user-modal').style.display = 'flex';
     }
 
     closeModal() {
@@ -160,8 +162,8 @@ class AdminPanel {
 
     async saveUserChanges() {
         const username = document.getElementById('edit-username').value;
-        const totalPoints = parseInt(document.getElementById('edit-total-points').value);
-        const currentPoints = parseInt(document.getElementById('edit-current-points').value);
+        const totalPoints = parseInt(document.getElementById('edit-total-points').value) || 0;
+        const currentPoints = parseInt(document.getElementById('edit-current-points').value) || 0;
 
         try {
             const response = await fetch('/api/admin/update-user', {
@@ -315,22 +317,31 @@ class AdminPanel {
     }
 
     renderStats(stats) {
-        document.getElementById('total-users').textContent = stats.total_users;
-        document.getElementById('total-points').textContent = stats.total_points;
-        document.getElementById('top-user').textContent = stats.top_user;
+        const totalUsers = document.getElementById('total-users');
+        const totalPoints = document.getElementById('total-points');
+        const topUser = document.getElementById('top-user');
+
+        if (totalUsers) totalUsers.textContent = stats.total_users || 0;
+        if (totalPoints) totalPoints.textContent = stats.total_points || 0;
+        if (topUser) topUser.textContent = stats.top_user || '-';
 
         // Render top users chart
-        this.renderTopUsersChart(stats.top_users);
+        if (stats.top_users) {
+            this.renderTopUsersChart(stats.top_users);
+        }
     }
 
     renderTopUsersChart(topUsers) {
         const chart = document.getElementById('top-users-chart');
+        if (!chart) return;
+
         chart.innerHTML = '';
 
-        const maxPoints = Math.max(...topUsers.map(user => user.totalpoint));
+        const maxPoints = Math.max(...topUsers.map(user => user.totalpoint || 0));
+        if (maxPoints <= 0) return;
         
         topUsers.forEach(user => {
-            const barHeight = (user.totalpoint / maxPoints) * 150;
+            const barHeight = ((user.totalpoint || 0) / maxPoints) * 150;
             const bar = document.createElement('div');
             bar.className = 'bar';
             bar.style.height = `${barHeight}px`;
@@ -341,9 +352,8 @@ class AdminPanel {
             label.textContent = user.username;
             
             const points = document.createElement('div');
-            points.textContent = user.totalpoint;
-            points.style.marginTop = '5px';
-            points.style.fontSize = '0.7rem';
+            points.textContent = user.totalpoint || 0;
+            points.className = 'text-xs text-slate-300 mt-1';
             
             bar.appendChild(label);
             bar.appendChild(points);
@@ -369,23 +379,6 @@ class AdminPanel {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 2rem;
-            border-radius: 5px;
-            color: white;
-            font-weight: 600;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-        `;
-
-        if (type === 'success') {
-            notification.style.background = '#27ae60';
-        } else {
-            notification.style.background = '#e74c3c';
-        }
 
         document.body.appendChild(notification);
 
@@ -393,25 +386,18 @@ class AdminPanel {
             notification.remove();
         }, 3000);
     }
+
+    escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 }
 
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new AdminPanel();
 });
-
-// Add CSS animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-`;
-document.head.appendChild(style);

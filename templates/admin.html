@@ -1,183 +1,426 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - MindX</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="admin-container">
-        <!-- Header -->
-        <header class="admin-header">
-            <h1><i class="fas fa-cogs"></i> Admin Panel</h1>
-            <div class="admin-info">
-                <span>Xin chào, <strong>{{ username }}</strong></span>
-                <a href="{{ url_for('logout') }}" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                </a>
+{% extends "base.html" %}
+
+{% block linkcss %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style type="text/tailwindcss">
+    @layer components {
+        /* Admin Container */
+        .admin-container {
+            @apply w-full h-full flex flex-col bg-slate-900;
+        }
+
+        /* Header */
+        .admin-header {
+            @apply flex justify-between items-center p-6 bg-slate-800 border-b border-slate-700;
+        }
+
+        .admin-header h1 {
+            @apply text-2xl font-bold text-white;
+        }
+
+        .admin-info {
+            @apply flex items-center gap-4 text-slate-300;
+        }
+
+        .logout-btn {
+            @apply px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-2;
+        }
+
+        /* Navigation */
+        .admin-nav {
+            @apply flex gap-2 p-4 bg-slate-800 border-b border-slate-700;
+        }
+
+        .nav-btn {
+            @apply px-6 py-3 rounded-lg transition-all duration-200 flex items-center gap-2 font-medium;
+        }
+
+        .nav-btn:not(.active) {
+            @apply bg-slate-700 hover:bg-slate-600 text-slate-300;
+        }
+
+        .nav-btn.active {
+            @apply bg-blue-600 text-white shadow-lg;
+        }
+
+        /* Main Content */
+        .admin-main {
+            @apply flex-1 overflow-auto p-6;
+        }
+
+        .tab-content {
+            @apply hidden;
+        }
+
+        .tab-content.active {
+            @apply block;
+        }
+
+        /* Tab Header */
+        .tab-header {
+            @apply flex justify-between items-center mb-6;
+        }
+
+        .tab-header h2 {
+            @apply text-xl font-bold text-white flex items-center gap-2;
+        }
+
+        .search-box {
+            @apply relative;
+        }
+
+        .search-box input {
+            @apply pl-10 pr-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500;
+        }
+
+        .search-box i {
+            @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400;
+        }
+
+        /* Users Table */
+        .users-table-container {
+            @apply bg-slate-800 rounded-lg overflow-hidden border border-slate-700;
+        }
+
+        .users-table {
+            @apply w-full text-left;
+        }
+
+        .users-table th {
+            @apply px-6 py-4 bg-slate-700 text-slate-300 font-semibold border-b border-slate-600;
+        }
+
+        .users-table td {
+            @apply px-6 py-4 border-b border-slate-700 text-slate-300;
+        }
+
+        .users-table tbody tr:hover {
+            @apply bg-slate-750;
+        }
+
+        /* Buttons */
+        .btn {
+            @apply px-4 py-2 rounded-lg transition-all duration-200 font-medium flex items-center gap-2;
+        }
+
+        .btn-sm {
+            @apply px-3 py-1 text-sm;
+        }
+
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 text-white;
+        }
+
+        .btn-warning {
+            @apply bg-yellow-600 hover:bg-yellow-700 text-white;
+        }
+
+        .btn-danger {
+            @apply bg-red-600 hover:bg-red-700 text-white;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            @apply grid grid-cols-1 md:grid-cols-3 gap-6 mb-8;
+        }
+
+        .stat-card {
+            @apply bg-slate-800 rounded-lg p-6 border border-slate-700 flex items-center gap-4;
+        }
+
+        .stat-icon {
+            @apply w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg;
+        }
+
+        .stat-info h3 {
+            @apply text-2xl font-bold text-white;
+        }
+
+        .stat-info p {
+            @apply text-slate-400 text-sm;
+        }
+
+        /* Charts */
+        .charts-container {
+            @apply bg-slate-800 rounded-lg p-6 border border-slate-700;
+        }
+
+        .chart-section h3 {
+            @apply text-lg font-semibold text-white mb-4;
+        }
+
+        .chart {
+            @apply flex items-end gap-2 h-48 p-4 bg-slate-900 rounded border border-slate-700;
+        }
+
+        .bar {
+            @apply bg-gradient-to-t from-blue-600 to-blue-400 rounded-t flex flex-col items-center justify-end pb-2 transition-all duration-300 hover:from-blue-500 hover:to-blue-300;
+        }
+
+        .bar-label {
+            @apply text-xs text-white font-medium mb-1 rotate-45 origin-bottom-left whitespace-nowrap;
+        }
+
+        /* Forms */
+        .password-form, .user-password-section {
+            @apply bg-slate-800 rounded-lg p-6 border border-slate-700 mb-6;
+        }
+
+        .user-password-section h3 {
+            @apply text-lg font-semibold text-white mb-4;
+        }
+
+        .form-group {
+            @apply mb-4;
+        }
+
+        .form-group label {
+            @apply block text-slate-300 mb-2 font-medium;
+        }
+
+        .form-input {
+            @apply w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors duration-200;
+        }
+
+        .form-actions {
+            @apply flex gap-3 mt-6;
+        }
+
+        /* Modal */
+        .modal {
+            @apply hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center;
+        }
+
+        .modal-content {
+            @apply bg-slate-800 rounded-lg w-full max-w-md border border-slate-700;
+        }
+
+        .modal-header {
+            @apply flex justify-between items-center p-6 border-b border-slate-700;
+        }
+
+        .modal-header h3 {
+            @apply text-xl font-bold text-white;
+        }
+
+        .close {
+            @apply text-2xl text-slate-400 hover:text-white cursor-pointer transition-colors duration-200;
+        }
+
+        .modal-body {
+            @apply p-6;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            @apply fixed top-5 right-5 px-8 py-4 rounded-lg text-white font-semibold z-[10000] animate-slideIn;
+        }
+
+        .notification.success {
+            @apply bg-green-600;
+        }
+
+        .notification.error {
+            @apply bg-red-600;
+        }
+    }
+
+    @layer utilities {
+        .bg-slate-750 {
+            background-color: rgb(30 41 59 / 0.5);
+        }
+        
+        .animate-slideIn {
+            animation: slideIn 0.3s ease;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fas fa-cogs"></i> Admin Panel</h1>
+        <div class="admin-info">
+            <span>Xin chào, <strong>{{ username }}</strong></span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <button class="nav-btn active" data-tab="users">Quản lý Users</button>
+        <button class="nav-btn" data-tab="stats">Thống kê</button>
+        <button class="nav-btn" data-tab="password">Đổi mật khẩu</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Users Management Tab -->
+        <div id="users-tab" class="tab-content active">
+            <div class="tab-header">
+                <h2><i class="fas fa-users"></i> Quản lý Người dùng</h2>
+                <div class="search-box">
+                    <input type="text" id="search-users" placeholder="Tìm kiếm user...">
+                    <i class="fas fa-search"></i>
+                </div>
             </div>
-        </header>
+            
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Tổng điểm</th>
+                            <th>Điểm hiện tại</th>
+                            <th>Items</th>
+                            <th>Item đang chọn</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        <!-- Navigation -->
-        <nav class="admin-nav">
-            <button class="nav-btn active" data-tab="users">Quản lý Users</button>
-            <button class="nav-btn" data-tab="stats">Thống kê</button>
-            <button class="nav-btn" data-tab="password">Đổi mật khẩu</button>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="admin-main">
-            <!-- Users Management Tab -->
-            <div id="users-tab" class="tab-content active">
-                <div class="tab-header">
-                    <h2><i class="fas fa-users"></i> Quản lý Người dùng</h2>
-                    <div class="search-box">
-                        <input type="text" id="search-users" placeholder="Tìm kiếm user...">
-                        <i class="fas fa-search"></i>
+        <!-- Statistics Tab -->
+        <div id="stats-tab" class="tab-content">
+            <div class="tab-header">
+                <h2><i class="fas fa-chart-bar"></i> Thống kê hệ thống</h2>
+            </div>
+            
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-users">0</h3>
+                        <p>Tổng số users</p>
                     </div>
                 </div>
                 
-                <div class="users-table-container">
-                    <table class="users-table">
-                        <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Tổng điểm</th>
-                                <th>Điểm hiện tại</th>
-                                <th>Items</th>
-                                <th>Item đang chọn</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-table-body">
-                            <!-- Users will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Statistics Tab -->
-            <div id="stats-tab" class="tab-content">
-                <div class="tab-header">
-                    <h2><i class="fas fa-chart-bar"></i> Thống kê hệ thống</h2>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-points">0</h3>
+                        <p>Tổng điểm hệ thống</p>
+                    </div>
                 </div>
                 
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="total-users">0</h3>
-                            <p>Tổng số users</p>
-                        </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="total-points">0</h3>
-                            <p>Tổng điểm hệ thống</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="top-user">-</h3>
-                            <p>User có điểm cao nhất</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="charts-container">
-                    <div class="chart-section">
-                        <h3>Top 10 Users</h3>
-                        <div class="chart" id="top-users-chart">
-                            <!-- Top users chart will be here -->
-                        </div>
+                    <div class="stat-info">
+                        <h3 id="top-user">-</h3>
+                        <p>User có điểm cao nhất</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Change Password Tab -->
-            <div id="password-tab" class="tab-content">
-                <div class="tab-header">
-                    <h2><i class="fas fa-key"></i> Đổi mật khẩu</h2>
-                </div>
-                
-                <div class="password-form">
-                    <div class="form-group">
-                        <label for="current-password">Mật khẩu hiện tại:</label>
-                        <input type="password" id="current-password" class="form-input">
+            <div class="charts-container">
+                <div class="chart-section">
+                    <h3>Top 10 Users</h3>
+                    <div class="chart" id="top-users-chart">
+                        <!-- Top users chart will be here -->
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="new-password">Mật khẩu mới:</label>
-                        <input type="password" id="new-password" class="form-input">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="confirm-password">Xác nhận mật khẩu mới:</label>
-                        <input type="password" id="confirm-password" class="form-input">
-                    </div>
-                    
-                    <button id="change-password-btn" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Đổi mật khẩu
-                    </button>
-                </div>
-
-                <div class="user-password-section">
-                    <h3>Đổi mật khẩu cho User khác</h3>
-                    <div class="form-group">
-                        <label for="target-username">Username:</label>
-                        <input type="text" id="target-username" class="form-input" placeholder="Nhập username">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="target-new-password">Mật khẩu mới:</label>
-                        <input type="password" id="target-new-password" class="form-input">
-                    </div>
-                    
-                    <button id="change-user-password-btn" class="btn btn-warning">
-                        <i class="fas fa-user-cog"></i> Đổi mật khẩu user
-                    </button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Edit User Modal -->
-    <div id="edit-user-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Chỉnh sửa User</h3>
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-username">
-                <div class="form-group">
-                    <label>Tổng điểm:</label>
-                    <input type="number" id="edit-total-points" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Điểm hiện tại:</label>
-                    <input type="number" id="edit-current-points" class="form-input">
-                </div>
-                <div class="form-actions">
-                    <button id="save-user-btn" class="btn btn-primary">Lưu</button>
-                    <button id="delete-user-btn" class="btn btn-danger">Xóa User</button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
-</body>
-</html>
+        <!-- Change Password Tab -->
+        <div id="password-tab" class="tab-content">
+            <div class="tab-header">
+                <h2><i class="fas fa-key"></i> Đổi mật khẩu</h2>
+            </div>
+            
+            <div class="password-form">
+                <div class="form-group">
+                    <label for="current-password">Mật khẩu hiện tại:</label>
+                    <input type="password" id="current-password" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">Mật khẩu mới:</label>
+                    <input type="password" id="new-password" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-password">Xác nhận mật khẩu mới:</label>
+                    <input type="password" id="confirm-password" class="form-input">
+                </div>
+                
+                <button id="change-password-btn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Đổi mật khẩu
+                </button>
+            </div>
+
+            <div class="user-password-section">
+                <h3>Đổi mật khẩu cho User khác</h3>
+                <div class="form-group">
+                    <label for="target-username">Username:</label>
+                    <input type="text" id="target-username" class="form-input" placeholder="Nhập username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="target-new-password">Mật khẩu mới:</label>
+                    <input type="password" id="target-new-password" class="form-input">
+                </div>
+                
+                <button id="change-user-password-btn" class="btn btn-warning">
+                    <i class="fas fa-user-cog"></i> Đổi mật khẩu user
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Edit User Modal -->
+<div id="edit-user-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Chỉnh sửa User</h3>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-username">
+            <div class="form-group">
+                <label>Tổng điểm:</label>
+                <input type="number" id="edit-total-points" class="form-input">
+            </div>
+            <div class="form-group">
+                <label>Điểm hiện tại:</label>
+                <input type="number" id="edit-current-points" class="form-input">
+            </div>
+            <div class="form-actions">
+                <button id="save-user-btn" class="btn btn-primary">Lưu</button>
+                <button id="delete-user-btn" class="btn btn-danger">Xóa User</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block linkjs %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}
