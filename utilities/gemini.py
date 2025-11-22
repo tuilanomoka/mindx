@@ -11,112 +11,83 @@ class Gemini:
         Extract JSON from markdown text with robust error handling
         """
         print("=== RAW GEMINI RESPONSE ===")
-        print(markdown_text)
+        print(repr(markdown_text))
         print("=== END RAW RESPONSE ===")
         
-        # Method 1: Direct JSON parsing with proper escaping
+        # Method 1: Đơn giản nhất - tìm JSON trong markdown
         try:
-            # Remove markdown code blocks first
-            clean_text = re.sub(r'```json|```', '', markdown_text).strip()
+            # Tìm nội dung JSON trong code block
+            json_match = re.search(r'```json\s*(\{.*?\})\s*```', markdown_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                # Nếu không có code block, tìm JSON trực tiếp
+                json_match = re.search(r'\{.*\}', markdown_text, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+                else:
+                    raise ValueError("No JSON found")
             
-            # Fix ALL escape sequences - this is the key fix!
-            # Replace double backslashes with single backslashes for LaTeX
-            clean_text = clean_text.replace('\\\\', '\\')
-            # Handle other escape sequences
-            clean_text = clean_text.replace('\\n', '\n')
-            clean_text = clean_text.replace('\\t', '\t')
-            
-            # Parse JSON
-            json_data = json.loads(clean_text)
-            print("✅ Successfully parsed JSON with escape fixing")
+            # Parse trực tiếp - KHÔNG xử lý escape phức tạp
+            json_data = json.loads(json_str)
+            print("✅ Successfully parsed JSON directly")
             return [json_data]
             
-        except json.JSONDecodeError as e:
+        except Exception as e:
             print(f"❌ Method 1 failed: {e}")
         
-        # Method 2: Try parsing the raw text as-is (sometimes it works)
+        # Method 2: Xử lý escape sequences đơn giản
         try:
-            json_data = json.loads(markdown_text)
-            print("✅ Successfully parsed raw text")
-            return [json_data]
-        except json.JSONDecodeError:
-            print("❌ Method 2 failed")
-        
-        # Method 3: Extract JSON from code blocks with aggressive cleaning
-        try:
-            # Find code blocks
-            code_blocks = re.findall(r'```(?:json)?\s*(\{.*?\})\s*```', markdown_text, re.DOTALL)
-            for block in code_blocks:
-                try:
-                    # Aggressive cleaning
-                    clean_block = block.strip()
-                    clean_block = clean_block.replace('\\\\', '\\')
-                    clean_block = clean_block.replace('\\n', '\n')
-                    clean_block = clean_block.replace('\\t', '\t')
-                    # Remove any trailing commas
-                    clean_block = re.sub(r',\s*([}\]])', r'\1', clean_block)
-                    
-                    json_data = json.loads(clean_block)
-                    print("✅ Successfully parsed cleaned code block")
-                    return [json_data]
-                except json.JSONDecodeError:
-                    continue
+            # Tìm JSON
+            json_match = re.search(r'\{.*\}', markdown_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                
+                # Chỉ fix các escape sequence cơ bản
+                json_str = json_str.replace('\\\\', '\\')  # \\ -> \
+                json_str = json_str.replace('\\n', '\n')
+                json_str = json_str.replace('\\t', '\t')
+                json_str = json_str.replace('\\"', '"')
+                
+                json_data = json.loads(json_str)
+                print("✅ Successfully parsed with simple escape fix")
+                return [json_data]
+                
         except Exception as e:
-            print(f"❌ Method 3 failed: {e}")
+            print(f"❌ Method 2 failed: {e}")
         
-        # Method 4: Manual reconstruction from the text
+        # Method 3: Manual reconstruction đơn giản
         try:
-            print("🛠️ Attempting manual reconstruction...")
+            print("🛠️ Simple manual reconstruction...")
             
-            # Extract loigiai array
-            loigiai_section = re.search(r'"loigiai"\s*:\s*\[(.*?)\]', markdown_text, re.DOTALL)
+            result = {"loigiai": []}
+            
+            # Tìm tất cả các bước
+            step_pattern = r'\{\s*"buoc"\s*:\s*"([^"]*)"\s*,\s*"chitiet"\s*:\s*"([^"]*)"\s*\}'
+            step_matches = re.findall(step_pattern, markdown_text)
+            
+            for buoc, chitiet in step_matches:
+                # Đơn giản: chỉ replace double backslash
+                chitiet = chitiet.replace('\\\\', '\\')
+                result["loigiai"].append({
+                    "buoc": buoc,
+                    "chitiet": chitiet
+                })
+            
+            # Tìm đáp án
             dapan_match = re.search(r'"dapan"\s*:\s*"([^"]*)"', markdown_text)
-            acstatus_match = re.search(r'"acstatus"\s*:\s*"([^"]*)"', markdown_text)
-            explain_match = re.search(r'"explain"\s*:\s*"([^"]*)"', markdown_text)
+            if dapan_match:
+                dapan = dapan_match.group(1).replace('\\\\', '\\')
+                result["dapan"] = dapan
+            else:
+                result["dapan"] = "Không có đáp án"
             
-            result = {}
-            
-            # Handle different response types
-            if loigiai_section:
-                # This is a process-question response
-                steps_text = loigiai_section.group(1)
-                steps = []
-                
-                # Find individual steps
-                step_pattern = r'\{\s*"buoc"\s*:\s*"([^"]*)"\s*,\s*"chitiet"\s*:\s*"([^"]*)"\s*\}'
-                step_matches = re.findall(step_pattern, steps_text)
-                
-                for buoc, chitiet in step_matches:
-                    # Fix escape sequences in the content
-                    chitiet = chitiet.replace('\\\\', '\\')
-                    steps.append({
-                        "buoc": buoc,
-                        "chitiet": chitiet
-                    })
-                
-                if steps:
-                    result["loigiai"] = steps
-                
-                if dapan_match:
-                    dapan = dapan_match.group(1).replace('\\\\', '\\')
-                    result["dapan"] = dapan
-                else:
-                    result["dapan"] = "Không có đáp án"
-                    
-            elif acstatus_match or explain_match:
-                # This is a process-answer response
-                if acstatus_match:
-                    result["acstatus"] = acstatus_match.group(1)
-                if explain_match:
-                    explain = explain_match.group(1).replace('\\\\', '\\')
-                    result["explain"] = explain
-            
-            if result:
-                print("✅ Successfully reconstructed JSON manually")
+            if result["loigiai"]:
+                print("✅ Successfully reconstructed manually")
                 return [result]
                 
         except Exception as e:
-            print(f"❌ Method 4 failed: {e}")
+            print(f"❌ Method 3 failed: {e}")
         
         # Final fallback
         print("🚨 Using fallback response")
@@ -125,8 +96,7 @@ class Gemini:
                 "buoc": "1",
                 "chitiet": "Lỗi phân tích phản hồi từ AI. Vui lòng thử lại."
             }],
-            "dapan": "Lỗi xử lý dữ liệu",
-            "error": "JSON parsing failed"
+            "dapan": "Lỗi xử lý dữ liệu"
         }]
 
     @classmethod
@@ -140,7 +110,7 @@ class Gemini:
         
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-pro",
+                model="gemini-2.5-flash",
                 contents=context,
             )
             

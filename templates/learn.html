@@ -2,34 +2,33 @@
 {% block linkcss %}
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
 <style>
-    /* Background và container */
-    body {
-        background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%) !important;
-        min-height: 100vh;
-        height: auto !important;
-        overflow-y: auto !important;
+    /* Reset và base styles */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
-    
+
+    body {
+        background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow-x: hidden;
+    }
+
     .learn-container {
         display: flex;
         flex-direction: column;
-        justify-content: flex-start;
         align-items: center;
         width: 100%;
-        height: auto !important;
         min-height: 100vh;
         padding: 40px 20px;
-        position: relative;
-        z-index: 1;
-        overflow-y: visible !important;
     }
 
     .learn-card {
-        margin: 0 auto;
         background: linear-gradient(135deg, rgba(42, 71, 56, 0.95) 0%, rgba(58, 95, 76, 0.95) 100%);
         border: 2px solid rgba(240, 228, 145, 0.5);
         backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
         border-radius: 24px;
         padding: 40px;
         box-shadow: 0 0 80px rgba(240, 228, 145, 0.15), 0 20px 60px rgba(0, 0, 0, 0.4);
@@ -40,8 +39,6 @@
         gap: 24px;
         animation: slideUp 0.6s ease-out;
         color: #fff;
-        height: auto;
-        overflow-y: visible !important;
     }
 
     @keyframes slideUp {
@@ -61,7 +58,10 @@
         margin-bottom: 10px;
     }
 
-    .header-title { text-align: center; }
+    .header-title { 
+        text-align: center;
+        flex: 1;
+    }
     .header-title h1 {
         font-size: 1.8rem;
         color: #F0E491;
@@ -84,14 +84,14 @@
         display: flex;
         align-items: center;
         gap: 5px;
+        white-space: nowrap;
     }
     .back-btn:hover {
         background: rgba(255, 255, 255, 0.2);
         border-color: #F0E491;
     }
-    .header-spacer { width: 80px; }
 
-    /* Input Elements */
+    /* Form Elements */
     .form-group { margin-bottom: 20px; }
     .input-label {
         display: block;
@@ -101,7 +101,10 @@
         font-size: 1rem;
     }
 
-    .select-wrapper { position: relative; max-width: 200px; }
+    .select-wrapper { 
+        position: relative; 
+        max-width: 200px;
+    }
     .custom-select {
         width: 100%;
         padding: 12px 16px;
@@ -144,7 +147,6 @@
         border: none;
         outline: none;
     }
-    math-field::part(container) { border: none; background: transparent; }
 
     /* Buttons */
     .primary-btn {
@@ -164,9 +166,13 @@
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(240, 228, 145, 0.4);
     }
-    .primary-btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(1); }
+    .primary-btn:disabled { 
+        opacity: 0.7; 
+        cursor: not-allowed; 
+        transform: none !important;
+        box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3) !important;
+    }
 
-    /* Nút Tiếp tục */
     .btn-continue {
         background: linear-gradient(90deg, #4caf50, #66bb6a);
         color: white;
@@ -188,10 +194,9 @@
     .btn-continue:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
-        background: linear-gradient(90deg, #43a047, #5eb363);
     }
 
-    /* Output Section */
+    /* Solution Section */
     .solution-section {
         display: flex;
         flex-direction: column;
@@ -218,10 +223,18 @@
         text-align: center;
         border: 1px dashed rgba(255, 255, 255, 0.3);
     }
-    .math-content { font-size: 1.4rem; color: white; }
+    .math-content { 
+        font-size: 1.4rem; 
+        color: white;
+        overflow-x: auto;
+    }
 
-    /* Solution Steps */
-    .steps-list { display: flex; flex-direction: column; gap: 16px; }
+    /* Steps */
+    .steps-list { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 16px; 
+    }
 
     .step {
         background: rgba(15, 23, 42, 0.6);
@@ -244,6 +257,21 @@
         padding: 20px;
         color: #e2e8f0;
         line-height: 1.6;
+        font-size: 1rem;
+    }
+
+    /* QUAN TRỌNG: Fix inline math không xuống dòng */
+    .step-content mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 2px !important;
+        vertical-align: -0.3ex !important;
+    }
+
+    .step-content .MathJax {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     .answer-section {
@@ -267,7 +295,12 @@
         text-align: center;
     }
 
-    /* Loading Toast */
+    .answer-content mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+    }
+
+    /* Loading */
     .loading-toast {
         position: fixed;
         bottom: 30px;
@@ -275,7 +308,6 @@
         background: rgba(42, 71, 56, 0.95);
         border: 1px solid rgba(240, 228, 145, 0.6);
         backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
         padding: 12px 24px;
         border-radius: 50px;
         display: flex;
@@ -296,20 +328,25 @@
         animation: spin 0.8s linear infinite;
     }
 
-    .loading-text { color: #fff; font-weight: 600; }
+    .loading-text { 
+        color: #fff; 
+        font-weight: 600;
+        white-space: nowrap;
+    }
 
     @keyframes slideInToast {
         from { opacity: 0; transform: translateY(20px) scale(0.9); }
         to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    @media (max-width: 768px) {
-        .learn-card { padding: 24px 16px; }
-        .header-title h1 { font-size: 1.4rem; }
-        .loading-toast { bottom: 20px; right: 20px; left: 20px; justify-content: center; }
+    @keyframes spin { 
+        to { transform: rotate(360deg); } 
     }
+    @keyframes fadeIn { 
+        from { opacity: 0; } 
+        to { opacity: 1; } 
+    }
+
+    /* Background effect */
     body::before {
         content: '';
         position: fixed;
@@ -323,33 +360,135 @@
             linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
         pointer-events: none;
         z-index: -1;
-        min-height: 100vh;
-        height: auto;
     }
-    html {
-        overflow-y: scroll !important;
-        height: 100% !important;
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .learn-container {
+            padding: 20px 15px;
+        }
+        
+        .learn-card {
+            padding: 24px 16px;
+        }
+        
+        .learn-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .header-title h1 {
+            font-size: 1.4rem;
+        }
+        
+        .back-btn {
+            align-self: flex-start;
+        }
+        
+        .loading-toast {
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+            justify-content: center;
+        }
+        
+        .step-content {
+            padding: 15px;
+            font-size: 0.95rem;
+        }
     }
-    
-    body {
-        background: linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%) !important;
-        min-height: 100vh;
+
+    /* Print styles */
+    @media print {
+        .back-btn, .btn-continue {
+            display: none;
+        }
+        
+        .learn-card {
+            box-shadow: none;
+            border: 1px solid #ccc;
+        }
+    }
+        .step-content {
+        padding: 20px;
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 1rem;
+        word-wrap: break-word;
+    }
+
+    /* QUAN TRỌNG: Reset hoàn toàn MathJax elements */
+    .step-content mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 1px !important;
+        line-height: 1 !important;
+        vertical-align: -0.3ex !important;
+        width: auto !important;
         height: auto !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
     }
-    
-    .learn-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        width: 100%;
-        min-height: 100vh;
-        padding: 40px 20px;
-        position: relative;
-        z-index: 1;
+
+    /* Force ALL MathJax to be inline */
+    mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
+
+    mjx-container[display="true"] {
+        display: inline !important;
+    }
+
+    /* Fix cho các wrapper elements */
+    .step-content .MathJax,
+    .step-content .MathJax_Display,
+    .step-content .MathJax_Preview {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+
+    /* Đảm bảo không có float */
+    .step-content mjx-container,
+    .step-content .MathJax {
+        float: none !important;
+        clear: none !important;
+    }
+
+    /* Fix cho answer content */
+    .answer-content mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Override mọi thứ có thể */
+    .step-content * {
+        display: inline !important;
+        white-space: normal !important;
+    }
+
+    .step-content br {
+        display: none !important;
+    }
+    @keyframes forceInline {
+    from { 
+        display: block !important;
+        margin: 1em 0 !important;
+    }
+    to { 
+        display: inline !important;
+        margin: 0 !important;
+    }
+}
+
+mjx-container {
+    animation: forceInline 0.1s forwards !important;
+}
 </style>
 {% endblock %}
 
@@ -364,7 +503,7 @@
                 <h1>📖 Chế độ Học Tập</h1>
                 <p class="tagline">Học chi tiết - Hiểu cặn kẽ từng bước</p>
             </div>
-            <div class="header-spacer"></div>
+            <div style="width: 80px;"></div> <!-- Spacer for alignment -->
         </div>
 
         <div id="question_div" class="input-section">
@@ -419,10 +558,13 @@
             <div class="steps-container">
                 <div class="section-badge">Lời giải chi tiết</div>
                 <div id="solve" class="steps-list">
-                    </div>
+                    <!-- Steps will be inserted here -->
+                </div>
             </div>
             
-            <div id="action-footer" class="footer-actions"></div>
+            <div id="action-footer" class="footer-actions">
+                <!-- Continue button will be inserted here -->
+            </div>
         </div>
     </div>
 </div>

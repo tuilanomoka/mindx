@@ -94,26 +94,24 @@
 
     {% block linkjs %}
     {% endblock %}
-    <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
     <script>
-        MathJax = {
+        window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true,
                 tags: 'ams'
             },
-            chtml: {
-                displayAlign: 'center',
-                displayIndent: '0em',
-                linebreaks: { automatic: true, width: "container" }
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'tex-ignore'
             },
             svg: {
-                fontCache: 'global',
-                linebreaks: { width: "container" }
+                fontCache: 'global'
             }
         };
     </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathlive"></script>
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
         </script>
