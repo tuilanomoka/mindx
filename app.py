@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, session, request, jsonify, redirect, url_for, render_template, send_from_directory
 from utilities.database import Database
 from utilities.gemini import Gemini
