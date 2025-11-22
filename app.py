@@ -12,7 +12,14 @@ CORS(app)
 app.secret_key = os.environ.get('SECRET_KEY', 'e030444c933825d56217aa758dfed56b61c592073c4aa997c9e25c30785c8a75')
 db = Database()
 
-
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=24),  # ↑ Tăng thời gian
+    SESSION_REFRESH_EACH_REQUEST=True,  # ↑ Refresh session mỗi request
+    SESSION_COOKIE_DOMAIN='.vercel.app'  # ↑ Cho subdomain Vercel
+)
 
 # Constants
 PROMPT_DIR = 'resources/prompts'
