@@ -2,3 +2,4 @@ google-genai
 flask
 dotenv
 mistune
+flask-cors

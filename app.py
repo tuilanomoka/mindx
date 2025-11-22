@@ -7,6 +7,7 @@ import time
 import json
 
 app = Flask(__name__)
+CORS(app)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-fixed-secret-key-change-in-production')
 db = Database()
 
