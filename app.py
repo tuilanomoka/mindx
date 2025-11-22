@@ -349,40 +349,6 @@ def get_rankings():
         app.logger.error(f"Error getting rankings: {str(e)}")
         return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy dữ liệu ranking'}), 500
     
-@app.route('/api/inventory')
-@login_required
-def get_inventory_api():
-    """API lấy inventory của user - FIXED ROUTE"""
-    try:
-        user_data = db.get_user_data(session['username'])
-        if not user_data:
-            return jsonify({'success': False, 'error': 'Không tìm thấy user'}), 404
-        
-        # Lấy danh sách items từ shop để có thông tin đầy đủ
-        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
-            shop_data = json.load(file)
-        
-        inventory = []
-        for item in shop_data['items']:
-            item_id = item['id']
-            if user_data.get(item_id, False):
-                inventory.append({
-                    'id': item_id,
-                    'name': item['name'],
-                    'price': item['price'],
-                    'selected': user_data.get('selecteditem') == item_id
-                })
-        
-        return jsonify({
-            'success': True, 
-            'inventory': inventory,
-            'current_points': user_data.get('currentpoint', 0),
-            'total_points': user_data.get('totalpoint', 0)
-        })
-        
-    except Exception as e:
-        app.logger.error(f"Error getting inventory: {str(e)}")
-        return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy inventory'}), 500
 
 @app.route('/shop')
 @login_required
