@@ -6,20 +6,23 @@ import os
 from functools import wraps
 import time
 import json
+from dotenv import load_dotenv
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.environ.get('SECRET_KEY', 'e030444c933825d56217aa758dfed56b61c592073c4aa997c9e25c30785c8a75')
 db = Database()
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+dotenv_path = os.path.join(BASE_DIR, '.env')
+load_dotenv(dotenv_path)
 app.config.update(
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=timedelta(hours=24),  # ↑ Tăng thời gian
     SESSION_REFRESH_EACH_REQUEST=True,  # ↑ Refresh session mỗi request
-    SESSION_COOKIE_DOMAIN='.vercel.app'  # ↑ Cho subdomain Vercel
+    SESSION_COOKIE_DOMAIN=None  # ↑ Cho subdomain Vercel
 )
 
 # Constants
@@ -55,7 +58,7 @@ def get_username():
 def read_prompt_file(filename):
     """Read prompt file with error handling"""
     try:
-        filepath = os.path.join(PROMPT_DIR, filename)
+        filepath = os.path.join(BASE_DIR, PROMPT_DIR, filename)
         with open(filepath, 'r', encoding='utf-8') as file:
             return file.read()
     except FileNotFoundError:
@@ -107,13 +110,13 @@ def login():
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
-    
+
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    
+
     if not username or not password:
         return jsonify({'success': False, 'message': 'Vui lòng nhập đầy đủ thông tin'}), 400
-    
+
     if db.login_user(username, password):
         session['username'] = username
         return jsonify({'success': True, 'message': 'Đăng nhập thành công!'})
@@ -125,16 +128,16 @@ def register():
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
-    
+
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    
+
     if not username or not password:
         return jsonify({'success': False, 'message': 'Vui lòng nhập đầy đủ thông tin'}), 400
-    
+
     if db.user_exists(username):
         return jsonify({'success': False, 'message': 'Tên đăng nhập đã tồn tại!'})
-    
+
     if db.register_user(username, password):
         return jsonify({'success': True, 'message': 'Đăng ký thành công!'})
     else:
@@ -151,26 +154,26 @@ def process_question():
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Không có dữ liệu'}), 400
-    
+
     lop = data.get('lop', '').strip()
     question_data = data.get('question', '').strip()
-    
+
     if not question_data:
         return jsonify({'error': 'Vui lòng nhập câu hỏi'}), 400
-    
+
     prompt_template = read_prompt_file(QUESTION_PROMPT_FILE)
     if not prompt_template:
         return jsonify({'error': 'Không thể đọc file prompt'}), 500
-    
+
     content = create_prompt_content(lop, question_data, prompt_template)
-    
+
     app.logger.info(f"Sending to Gemini: {content}")
-    
+
     try:
         questions_json = Gemini.generate_question(content)
         app.logger.info(f"Gemini response type: {type(questions_json)}")
         app.logger.info(f"Gemini response: {questions_json}")
-        
+
         # Validate and process response
         if not questions_json:
             app.logger.error("Gemini returned None or empty")
@@ -178,7 +181,7 @@ def process_question():
                 'loigiai': [{'buoc': '1', 'chitiet': 'Lỗi: Không có phản hồi từ AI'}],
                 'dapan': 'Lỗi hệ thống'
             })
-        
+
         # Ensure we have a list and get first item
         if isinstance(questions_json, list):
             if len(questions_json) == 0:
@@ -190,7 +193,7 @@ def process_question():
             result = questions_json[0]
         else:
             result = questions_json
-        
+
         # Validate result structure
         if not isinstance(result, dict):
             app.logger.error(f"Invalid result type: {type(result)}")
@@ -198,18 +201,18 @@ def process_question():
                 'loigiai': [{'buoc': '1', 'chitiet': 'Định dạng dữ liệu không hợp lệ'}],
                 'dapan': 'Lỗi định dạng'
             })
-        
+
         # FIXED: Don't overwrite existing data, just ensure structure
         final_result = result.copy()  # Keep original data
-        
+
         # Ensure loigiai exists and is a list
         if 'loigiai' not in final_result or not isinstance(final_result['loigiai'], list):
             final_result['loigiai'] = [{'buoc': '1', 'chitiet': 'Không có lời giải chi tiết'}]
-        
+
         # Ensure dapan exists
         if 'dapan' not in final_result:
             final_result['dapan'] = 'Không có đáp án'
-        
+
         # Validate and fix each step
         for i, step in enumerate(final_result['loigiai']):
             if not isinstance(step, dict):
@@ -219,15 +222,15 @@ def process_question():
                     step['buoc'] = str(i+1)
                 if 'chitiet' not in step:
                     step['chitiet'] = step.get('tomtat', 'Không có mô tả chi tiết')
-        
+
         app.logger.info(f"Final processed result: {final_result}")
         return jsonify(final_result)
-        
+
     except Exception as e:
         app.logger.error(f"Error in process_question: {str(e)}")
         import traceback
         app.logger.error(f"Traceback: {traceback.format_exc()}")
-        
+
         return jsonify({
             'loigiai': [{'buoc': '1', 'chitiet': f'Lỗi hệ thống: {str(e)}'}],
             'dapan': 'Lỗi xử lý'
@@ -239,21 +242,21 @@ def process_answer():
     data = request.get_json()
     if not data:
         return jsonify({'error': 'Không có dữ liệu'}), 400
-    
+
     lop = data.get('lop', '').strip()
     question = data.get('question', '').strip()
     user_answer = data.get('user_answer', '').strip()
     question_id = data.get('id','').strip()
-    
+
     if not question or not user_answer:
         return jsonify({'error': 'Thiếu thông tin câu hỏi hoặc câu trả lời'}), 400
-    
+
     prompt_template = read_prompt_file(COMPARE_PROMPT_FILE)
     if not prompt_template:
         return jsonify({'error': 'Không thể đọc file prompt'}), 500
-    
+
     prompt = f"Lớp: {lop}\nCâu hỏi: {question}\nCâu trả lời của học sinh: {user_answer}\n\n{prompt_template}"
-    
+
     try:
         compare_result = Gemini.generate_question(prompt)
         app.logger.info(f"Comparison result for question: {question}")
@@ -283,21 +286,21 @@ def process_answer():
 def new_session_id():
     """Create new session ID for practice problem"""
     app.logger.info(f"new_session_id endpoint called by user: {session.get('username')}")
-    
+
     if 'username' not in session:
         app.logger.warning("new_session_id: User not logged in")
         return jsonify({'success': False, 'grade': 0, 'comment': 'Not logged in', 'id': ''}), 403
-    
+
     epoch_time = int(time.time())
     session_key = f"score_{epoch_time}"
-    
+
     if session_key in session:
         app.logger.warning(f"new_session_id: Session already exists: {session_key}")
         return jsonify({'success': False, 'grade': 0, 'comment': 'Already exists', 'id': ''}), 409
-    
+
     session[session_key] = 100
     app.logger.info(f"new_session_id: Created new session: {session_key} for user: {session['username']}")
-    
+
     return jsonify({
         'success': True,
         'grade': 100,
@@ -314,7 +317,7 @@ def update_temporary_score():
     session_id = data.get('id','').strip()
     if "score_"+session_id not in session:
         return jsonify({'success':False,'grade':0,'comment':'Not existed', 'id':''}), 404
-    
+
     newScore = int(session["score_"+session_id]) + int(change_in_score)
     if newScore < 0: newScore = 0
     session["score_"+session_id] = newScore
@@ -338,27 +341,27 @@ def get_rankings():
     """API lấy dữ liệu xếp hạng"""
     try:
         rankings = db.get_rankings(limit=50)
-        
+
         # Format dữ liệu ranking
         rank_data = []
         for rank, user_data in enumerate(rankings, 1):
             # Debug: log thông tin user
             app.logger.info(f"User {user_data['username']} - selecteditem: {user_data.get('selecteditem')}")
-            
+
             rank_data.append({
                 'rank': rank,
                 'username': user_data['username'],
                 'totalpoint': user_data['totalpoint'],
                 'selecteditem': user_data.get('selecteditem', 'none')  # Đảm bảo luôn có giá trị
             })
-        
+
         app.logger.info(f"Rankings data: {rank_data}")  # Debug
         return jsonify({'success': True, 'rankings': rank_data})
-    
+
     except Exception as e:
         app.logger.error(f"Error getting rankings: {str(e)}")
         return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy dữ liệu ranking'}), 500
-    
+
 
 @app.route('/shop')
 @login_required
@@ -369,7 +372,7 @@ def shop_page():
 def get_shop_items():
     """API lấy danh sách items trong shop"""
     try:
-        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+        with open(os.path.join(BASE_DIR, SHOP_ITEMS_FILE), 'r', encoding='utf-8') as file:
             shop_data = json.load(file)
             return jsonify({'success': True, 'items': shop_data['items']})
     except Exception as e:
@@ -382,79 +385,79 @@ def buy_item():
     """API mua item từ shop"""
     data = request.get_json()
     app.logger.info(f"Buy item request data: {data}")
-    
+
     if not data:
         return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
-    
+
     item_id = data.get('item_id', '').strip()
     app.logger.info(f"Item ID: {item_id}")
-    
+
     if not item_id:
         return jsonify({'success': False, 'message': 'Thiếu thông tin item'}), 400
-    
+
     try:
         # Lấy thông tin user
         username = session['username']
         user_data = db.get_user_data(username)
         app.logger.info(f"User data: {user_data}")  # Debug toàn bộ user data
-        
+
         if not user_data:
             return jsonify({'success': False, 'message': 'Không tìm thấy thông tin user'}), 404
-        
+
         # Lấy thông tin item từ shop
-        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+        with open(os.path.join(BASE_DIR, SHOP_ITEMS_FILE), 'r', encoding='utf-8') as file:
             shop_data = json.load(file)
-        
+
         item_info = None
         for item in shop_data['items']:
             if item['id'] == item_id:
                 item_info = item
                 break
-        
+
         if not item_info:
             return jsonify({'success': False, 'message': 'Item không tồn tại'}), 404
-        
+
         app.logger.info(f"Item info: {item_info}")  # Debug item info
-        
+
         # Kiểm tra user đã sở hữu item chưa
         owns_item = user_data.get(item_id, False)
         app.logger.info(f"User owns {item_id}: {owns_item}")  # Debug trạng thái sở hữu
-        
+
         if owns_item:
             return jsonify({'success': False, 'message': 'Bạn đã sở hữu item này'}), 400
-        
+
         # Kiểm tra đủ điểm không
         current_points = user_data.get('currentpoint', 0)
         item_price = item_info['price']
-        
+
         app.logger.info(f"User points: {current_points}, Item price: {item_price}")  # Debug điểm
-        
+
         if current_points < item_price:
             return jsonify({'success': False, 'message': f'Không đủ điểm để mua. Bạn có {current_points} điểm, cần {item_price} điểm'}), 400
-        
+
         # Thực hiện mua item
         new_current_points = current_points - item_price
-        
+
         app.logger.info(f"Updating field {item_id} to True")
         db.update_field(username, item_id, True)
-        
+
         app.logger.info(f"Updating current points to {new_current_points}")
         db.update_current_point(username, new_current_points)
-        
+
         app.logger.info(f"Purchase successful for {username}: {item_info['name']}")
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': f'Mua {item_info["name"]} thành công!',
             'new_balance': new_current_points
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error buying item: {str(e)}")
         import traceback
         app.logger.error(f"Traceback: {traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi mua item'}), 500
-    
+
 @app.route('/api/inventory')
 @login_required
 def get_inventory():
@@ -463,11 +466,11 @@ def get_inventory():
         user_data = db.get_user_data(session['username'])
         if not user_data:
             return jsonify({'success': False, 'error': 'Không tìm thấy user'}), 404
-        
+
         # Lấy danh sách items từ shop để có thông tin đầy đủ
-        with open(SHOP_ITEMS_FILE, 'r', encoding='utf-8') as file:
+        with open(os.path.join(BASE_DIR, SHOP_ITEMS_FILE), 'r', encoding='utf-8') as file:
             shop_data = json.load(file)
-        
+
         inventory = []
         for item in shop_data['items']:
             item_id = item['id']
@@ -478,14 +481,14 @@ def get_inventory():
                     'price': item['price'],
                     'selected': user_data.get('selecteditem') == item_id
                 })
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'inventory': inventory,
             'current_points': user_data.get('currentpoint', 0),
             'total_points': user_data.get('totalpoint', 0)
         })
-        
+
     except Exception as e:
         app.logger.error(f"Error getting inventory: {str(e)}")
         return jsonify({'success': False, 'error': 'Có lỗi xảy ra khi lấy inventory'}), 500
@@ -497,23 +500,23 @@ def select_item():
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'message': 'Không có dữ liệu'}), 400
-    
+
     item_id = data.get('item_id', '').strip()
-    
+
     if not item_id:
         return jsonify({'success': False, 'message': 'Thiếu thông tin item'}), 400
-    
+
     try:
         # Kiểm tra user có sở hữu item không
         user_data = db.get_user_data(session['username'])
         if not user_data.get(item_id, False):
             return jsonify({'success': False, 'message': 'Bạn không sở hữu item này'}), 400
-        
+
         # Cập nhật selected item
         db.update_selected_item(session['username'], item_id)
-        
+
         return jsonify({'success': True, 'message': 'Đã chọn item thành công!'})
-        
+
     except Exception as e:
         app.logger.error(f"Error selecting item: {str(e)}")
         return jsonify({'success': False, 'message': 'Có lỗi xảy ra khi chọn item'}), 500
@@ -535,7 +538,7 @@ def admin_get_users():
     """API lấy danh sách users (chỉ admin)"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     try:
         users = db.get_all_users()
         return jsonify({'success': True, 'users': users})
@@ -549,19 +552,19 @@ def admin_get_stats():
     """API lấy thống kê hệ thống (chỉ admin)"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     try:
         users = db.get_all_users()
         total_users = len(users)
         total_points = sum(user.get('totalpoint', 0) for user in users)
-        
+
         # Tìm user có điểm cao nhất
         top_user = max(users, key=lambda x: x.get('totalpoint', 0), default=None)
         top_user_name = top_user['username'] if top_user else 'Không có'
-        
+
         # Top 10 users
         top_users = sorted(users, key=lambda x: x.get('totalpoint', 0), reverse=True)[:10]
-        
+
         return jsonify({
             'success': True,
             'total_users': total_users,
@@ -579,18 +582,18 @@ def admin_update_user():
     """API cập nhật thông tin user (chỉ admin)"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
-    
+
     username = data.get('username')
     total_point = data.get('total_point', 0)
     current_point = data.get('current_point', 0)
-    
+
     if not username:
         return jsonify({'success': False, 'error': 'Thiếu username'}), 400
-    
+
     try:
         if db.update_user_points(username, total_point, current_point):
             return jsonify({'success': True, 'message': 'Cập nhật thành công'})
@@ -606,19 +609,19 @@ def admin_delete_user():
     """API xóa user (chỉ admin)"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
-    
+
     username = data.get('username')
-    
+
     if not username:
         return jsonify({'success': False, 'error': 'Thiếu username'}), 400
-    
+
     if username == 'admin':
         return jsonify({'success': False, 'error': 'Không thể xóa tài khoản admin'}), 400
-    
+
     try:
         if db.delete_user(username):
             return jsonify({'success': True, 'message': 'Xóa user thành công'})
@@ -634,21 +637,21 @@ def admin_change_own_password():
     """API đổi mật khẩu của chính admin"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
-    
+
     current_password = data.get('current_password')
     new_password = data.get('new_password')
-    
+
     if not current_password or not new_password:
         return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ thông tin'}), 400
-    
+
     # Verify current password
     if not db.login_user(session['username'], current_password):
         return jsonify({'success': False, 'error': 'Mật khẩu hiện tại không đúng'}), 400
-    
+
     # Update password
     if db.update_user_password(session['username'], new_password):
         return jsonify({'success': True, 'message': 'Đổi mật khẩu thành công'})
@@ -661,17 +664,17 @@ def admin_change_user_password():
     """API đổi mật khẩu của user khác (chỉ admin)"""
     if not db.is_admin(session['username']):
         return jsonify({'success': False, 'error': 'Không có quyền truy cập'}), 403
-    
+
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'error': 'Không có dữ liệu'}), 400
-    
+
     username = data.get('username')
     new_password = data.get('new_password')
-    
+
     if not username or not new_password:
         return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ thông tin'}), 400
-    
+
     # Update password
     if db.update_user_password(username, new_password):
         return jsonify({'success': True, 'message': f'Đổi mật khẩu cho {username} thành công'})
@@ -719,6 +722,6 @@ def change_account_information():
     except ExceptionType as e:
         app.logger.error(f"Error trying to update data: {e}")
         return jsonify({"success":False,"error":e}), 500
-            
+
 if __name__ == '__main__':
     app.run(debug=True)
