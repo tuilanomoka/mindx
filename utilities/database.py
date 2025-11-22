@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Any
 import logging  # Thêm import logging
 
 class Database:
-    def __init__(self, db_name: str = '/tmp/mindx-efubhfgvebyvghefrb/database.db'):
+    def __init__(self, db_name: str = '/tmp/database.db'):
         self.db_name = db_name
         self.init_db()
     
