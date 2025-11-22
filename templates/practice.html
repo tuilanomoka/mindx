@@ -2,6 +2,213 @@
 {% block linkcss %}
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
 <style type="text/tailwindcss">
+    /* ==================================================================
+       FIX CỰC MẠNH: BUỘC TOÀN BỘ CÔNG THỨC TOÁN HIỂN THỊ INLINE (PRACTICE MODE)
+       ================================================================== */
+    .step-content,
+    .problem-display,
+    .math-content,
+    .answer-content,
+    #final-answer-content,
+    .result {
+        /* Đảm bảo mọi nội dung chứa math đều không bị line-height bất thường */
+        line-height: normal !important;
+    }
+
+    /* 1. MathJax - ép inline tuyệt đối */
+    mjx-container,
+    mjx-container * {
+        display: inline !important;
+        float: none !important;
+        clear: none !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0 2px !important;
+        padding: 0 !important;
+        vertical-align: middle !important;
+        line-height: normal !important;
+        text-align: left !important;
+    }
+
+    /* Vô hiệu hóa hoàn toàn display mode của MathJax */
+    mjx-container[jax="CHTML"][display="true"],
+    mjx-container[display="true"] {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Fix các wrapper cũ của MathJax */
+    .MathJax, .MathJax_Display, .MathJax_Preview, .mjx-full-width {
+        display: inline !important;
+        text-align: left !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 2. MathLive (math-field output) */
+    mfenced, math, mrow, mstyle, msup, msub, msqrt, mfrac {
+        display: inline !important;
+    }
+
+    /* 3. Force reflow để trình duyệt không cache kiểu cũ */
+    .math-content mjx-container,
+    .step-content mjx-container,
+    #problem mjx-container,
+    .answer-content mjx-container {
+        animation: forceInlineMath 0.01s forwards !important;
+    }
+
+    @keyframes forceInlineMath {
+        from { display: block; margin: 1em 0; }
+        to   { display: inline; margin: 0 2px; }
+    }
+
+    /* ==================================================================
+       FIX KHUNG NHẬP MATH-FIELD (QUÁ NHỎ → LỚN HƠN, DỄ NHẬP HƠN)
+       ================================================================== */
+    .math-input-container {
+        background: rgba(0, 0, 0, 0.35);
+        border: 2px solid rgba(240, 228, 145, 0.4);
+        border-radius: 16px;
+        padding: 8px 12px;               /* Tăng padding */
+        transition: all 0.3s ease;
+        min-height: 66px;                 /* Đảm bảo chiều cao tối thiểu */
+    }
+
+    .math-input-container:focus-within {
+        border-color: #F0E491;
+        box-shadow: 0 0 20px rgba(240, 228, 145, 0.35);
+        background: rgba(0, 0, 0, 0.55);
+    }
+
+    math-field {
+        width: 100% !important;
+        min-height: 50px;                 /* Tăng chiều cao vùng nhập */
+        font-size: 1.5rem !important;     /* Chữ lớn hơn, dễ đọc/dễ bấm */
+        padding: 12px 8px !important;     /* Padding bên trong */
+        background: transparent !important;
+        color: white !important;
+        --caret-color: #F0E491;
+        --selection-background-color: rgba(240, 228, 145, 0.3);
+        --selection-color: white;
+        border: none !important;
+        outline: none !important;
+        border-radius: 12px;
+    }
+
+    /* Mobile: tăng thêm kích thước khi dùng bàn phím ảo */
+    @media (max-width: 768px) {
+        math-field {
+            font-size: 1.7rem !important;
+            min-height: 70px !important;
+            padding: 16px 10px !important;
+        }
+        .math-input-container {
+            min-height: 90px;
+            border-radius: 20px;
+            padding: 12px 16px;
+        }
+    }
+
+    /* Đảm bảo placeholder cũng lớn */
+    math-field::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* Fix hiện tượng math-field bị cắt trên một số trình duyệt */
+    math-field::part(container),
+    math-field::part(math-field) {
+        min-height: inherit !important;
+    }
+
+    /* ==================================================================
+       CÁC STYLE KHÁC GIỮ NGUYÊN (không thay đổi)
+       ================================================================== */
+
+    /* FIX QUAN TRỌNG CHO INLINE MATH - PRACTICE MODE */
+    .step-content {
+        padding: 20px;
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 1rem;
+        word-wrap: break-word;
+    }
+
+    /* Reset hoàn toàn MathJax elements */
+    .step-content mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 1px !important;
+        line-height: 1 !important;
+        vertical-align: -0.3ex !important;
+        width: auto !important;
+        height: auto !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+    }
+
+    /* Force ALL MathJax to be inline */
+    mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    mjx-container[display="true"] {
+        display: inline !important;
+    }
+
+    /* Fix cho các wrapper elements */
+    .step-content .MathJax,
+    .step-content .MathJax_Display,
+    .step-content .MathJax_Preview {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
+    }
+
+    /* Đảm bảo không có float */
+    .step-content mjx-container,
+    .step-content .MathJax {
+        float: none !important;
+        clear: none !important;
+    }
+
+    /* Fix cho answer content */
+    .answer-content mjx-container,
+    #final-answer-content mjx-container,
+    .result mjx-container {
+        display: inline !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Override mọi thứ có thể */
+    .step-content * {
+        white-space: normal !important;
+    }
+
+    /* Animation để force inline */
+    @keyframes forceInline {
+        from { 
+            display: block !important;
+            margin: 1em 0 !important;
+        }
+        to { 
+            display: inline !important;
+            margin: 0 !important;
+        }
+    }
+
+    mjx-container {
+        animation: forceInline 0.1s forwards !important;
+    }
+</style>
+
+<style type="text/tailwindcss">
     @layer base {
         html, body {
             height: auto !important;
@@ -429,6 +636,7 @@
     .step-content.hidden { 
         display: none; 
     }
+    
 </style>
 {% endblock %}
 

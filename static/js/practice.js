@@ -34,7 +34,7 @@ const DomUtils = {
         if (!button) return;
         if (loading) {
             button.dataset.originalText = button.innerHTML;
-            button.innerHTML = `<span class="btn-spinner">⏳</span> ${text}`;
+            button.innerHTML = `<span class="btn-spinner">Loading</span> ${text}`;
             button.disabled = true;
         } else {
             button.innerHTML = button.dataset.originalText || 'Gửi';
@@ -174,8 +174,34 @@ class SessionManager {
     }
 }
 
-// Question Management
+// Question Management - ĐÃ ĐƯỢC FIX HOÀN CHỈNH
 class QuestionManager {
+    static normalizeContent(text) {
+        if (!text) return '';
+       
+        return text
+            // Gom tất cả thành 1 dòng, chỉ giữ lại 1 space
+            .replace(/\s+/g, ' ')
+            // Loại bỏ space thừa quanh $
+            .replace(/\s*\$\s*/g, '$')
+            // Đảm bảo không có HTML break lines
+            .replace(/<br\s*\/?>/gi, ' ')
+            .replace(/\\n/g, ' ')
+            .trim();
+    }
+
+    static fixLaTeX(text) {
+        if (!text || typeof text !== 'string') return '';
+       
+        return text
+            .replace(/\\x0crac/g, '\\frac')
+            .replace(/\x0c/g, '\\')
+            .replace(/\\\\/g, '\\')
+            .replace(/\$\s+/g, '$')
+            .replace(/\s+\$/g, '$')
+            .trim();
+    }
+
     static async submitMathQuestion() {
         const lop = DomUtils.getValue(DomUtils.getElement('lop'));
         const question = DomUtils.getValue(DomUtils.getElement('question'));
@@ -252,11 +278,15 @@ class QuestionManager {
         const stepsHTML = questionData.loigiai.map((step, index) => {
             const stepNumber = step.buoc || index + 1;
             let stepDetail = step.chitiet || step.noi_dung || `Bước ${stepNumber}`;
-            stepDetail = stepDetail.replace('\x0c', '\\f');
+           
+            // Áp dụng fix LaTeX + normalize
+            stepDetail = this.fixLaTeX(stepDetail);
+            stepDetail = this.normalizeContent(stepDetail);
+           
             return `
                 <div id="step-${index + 1}" class="step">
                     <a href="javascript:void(0);" class="step-link" data-step="${index}">
-                        🔓 Mở gợi ý Bước ${stepNumber}
+                        Mở gợi ý Bước ${stepNumber}
                     </a>
                     <div class="step-content hidden" data-step="${index}">
                         ${stepDetail}
@@ -266,7 +296,7 @@ class QuestionManager {
         }).join('');
 
         container.innerHTML = stepsHTML;
-        
+       
         container.querySelectorAll('.step-link').forEach(link => {
             link.addEventListener('click', (e) => this.handleStepClick(e));
         });
@@ -274,18 +304,23 @@ class QuestionManager {
 
     static displayFinalAnswer(container, questionData) {
         if (!questionData.dapan) return;
+       
+        let finalAnswer = questionData.dapan;
+        finalAnswer = this.fixLaTeX(finalAnswer);
+        finalAnswer = this.normalizeContent(finalAnswer);
+       
         const answerHTML = `
             <div class="answer-section">
                 <a href="javascript:void(0);" id="final-answer-link">
-                   🏳️ Tôi bỏ cuộc - Xem đáp án cuối cùng (0 điểm)
+                   Tôi bỏ cuộc - Xem đáp án cuối cùng (0 điểm)
                 </a>
                 <div id="final-answer-content" class="hidden">
-                    Đáp án: ${questionData.dapan.replace('\x0c', '\\f')}
+                    Đáp án: ${finalAnswer}
                 </div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', answerHTML);
-        
+       
         const link = DomUtils.getElement('final-answer-link');
         if(link) link.addEventListener('click', this.handleFinalAnswerClick, { once: true });
     }
@@ -301,7 +336,7 @@ class QuestionManager {
         link.style.display = 'none';
         
         practiceState.viewedSteps.add(link.dataset.step);
-        this.renderMathJax([stepContent]);
+        this.renderMathAggressive([stepContent]);
 
         if (practiceState.sessionId && practiceState.numberOfSteps > 0) {
             const deduction = -100 / practiceState.numberOfSteps;
@@ -314,7 +349,7 @@ class QuestionManager {
 
         const btn = document.createElement('button');
         btn.className = 'btn-continue';
-        btn.innerHTML = '🔄 Tiếp tục bài toán khác';
+        btn.innerHTML = 'Tiếp tục bài toán khác';
         btn.onclick = () => window.location.reload();
         container.appendChild(btn);
     }
@@ -326,7 +361,7 @@ class QuestionManager {
         DomUtils.toggleVisibility(content, true);
         DomUtils.toggleVisibility(link, false);
         
-        this.renderMathJax([content]);
+        this.renderMathAggressive([content]);
         if(practiceState.sessionId) SessionManager.zeroOutPoints();
 
         const container = document.querySelector('.answer-section');
@@ -367,25 +402,25 @@ class QuestionManager {
 
         const resultDiv = document.createElement('div');
         resultDiv.id = 'answer-result';
-        
+       
         const data = Array.isArray(result) ? result[0] : result;
         const isCorrect = data?.acstatus === 'true';
-        
+       
         resultDiv.className = `result ${isCorrect ? 'correct' : 'incorrect'}`;
-        
+       
         let explain = data?.explain || '';
         if (!explain || explain === 'null') {
             explain = 'Không có giải thích chi tiết.';
         } else {
-            explain = explain.replace(/\\n/g, '<br>');
-            explain = explain.replace('\x0c', '\\f');
+            explain = this.fixLaTeX(explain);
+            explain = this.normalizeContent(explain);
         }
 
         resultDiv.innerHTML = `
-            <h3>${isCorrect ? '🎉 CHÍNH XÁC!' : '❌ CHƯA ĐÚNG'}</h3>
+            <h3>${isCorrect ? 'CHÍNH XÁC!' : 'CHƯA ĐÚNG'}</h3>
             <p><strong>Giải thích:</strong> ${explain}</p>
         `;
-        
+       
         if(DomUtils.getElement('answer-result-container')) {
             DomUtils.getElement('answer-result-container').appendChild(resultDiv);
         } else {
@@ -393,29 +428,83 @@ class QuestionManager {
         }
 
         setTimeout(() => {
-            this.renderMathJax([resultDiv]);
+            this.renderMathAggressive([resultDiv]);
             resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }, 50);
 
         this.appendContinueButton(resultDiv);
     }
 
-    static renderMathJax(elements) {
+    // PHƯƠNG THỨC RENDER MỚI - CỰC MẠNH
+    static renderMathAggressive(elements) {
         const validElements = elements.filter(el => el && el instanceof HTMLElement);
         if (validElements.length === 0) return;
 
         if (window.MathJax && window.MathJax.typesetPromise) {
-            if (window.MathJax.texReset) window.MathJax.texReset();
+            if (window.MathJax.config && window.MathJax.config.tex) {
+                window.MathJax.config.tex.inlineMath = [['$', '$'], ['\\(', '\\)']];
+            }
+           
             window.MathJax.typesetPromise(validElements)
+                .then(() => {
+                    console.log('MathJax aggressive rendering completed');
+                    this.forceAggressiveInline();
+                })
                 .catch(err => {
-                    console.warn('MathJax Rendering Warning:', err);
-                    if (window.MathLive) {
-                        validElements.forEach(el => window.MathLive.renderMathInElement(el));
+                    console.warn('MathJax failed, forcing inline:', err);
+                    this.forceAggressiveInline();
+                });
+        } else {
+            this.forceAggressiveInline();
+        }
+    }
+
+    static forceAggressiveInline() {
+        setTimeout(() => {
+            const allMathElements = document.querySelectorAll(
+                'mjx-container, .MathJax, .MathJax_Display, .MathJax_Preview, [class*="math"]'
+            );
+           
+            allMathElements.forEach(mathEl => {
+                mathEl.style.cssText = `
+                    display: inline !important;
+                    margin: 0 !important;
+                    padding: 0 1px !important;
+                    line-height: 1 !important;
+                    vertical-align: middle !important;
+                    width: auto !important;
+                    height: auto !important;
+                    float: none !important;
+                    clear: none !important;
+                    white-space: nowrap !important;
+                `;
+               
+                const children = mathEl.querySelectorAll('*');
+                children.forEach(child => {
+                    child.style.display = 'inline !important';
+                    child.style.margin = '0 !important';
+                    child.style.padding = '0 !important';
+                });
+            });
+
+            const stepContents = document.querySelectorAll('.step-content, .result, #final-answer-content');
+            stepContents.forEach(content => {
+                content.style.whiteSpace = 'normal';
+                content.style.wordWrap = 'break-word';
+               
+                const children = Array.from(content.childNodes);
+                children.forEach(child => {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        child.textContent = child.textContent.replace(/\s+/g, ' ');
                     }
                 });
-        } else if (window.MathLive && window.MathLive.renderMathInElement) {
-            validElements.forEach(el => window.MathLive.renderMathInElement(el));
-        }
+            });
+        }, 150);
+    }
+
+    // Giữ lại tên cũ để tương thích
+    static renderMathJax(elements) {
+        this.renderMathAggressive(elements);
     }
 
     static handleError(error, context) {
@@ -431,7 +520,7 @@ function navigateToHome() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Practice page initialized (Optimized)');
+    console.log('Practice page initialized (Fixed LaTeX + Inline Rendering)');
 });
 
 // Export to global scope
