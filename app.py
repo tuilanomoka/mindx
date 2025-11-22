@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-app.secret_key = os.environ.get('SECRET_KEY', 'your-fixed-secret-key-change-in-production')
+app.secret_key = os.environ.get('SECRET_KEY', 'e030444c933825d56217aa758dfed56b61c592073c4aa997c9e25c30785c8a75')
 db = Database()
 
 
