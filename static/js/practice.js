@@ -34,7 +34,7 @@ const DomUtils = {
         if (!button) return;
         if (loading) {
             button.dataset.originalText = button.innerHTML;
-            button.innerHTML = `<span class="btn-spinner">Loading</span> ${text}`;
+            button.innerHTML = `⏳ ${text}`;
             button.disabled = true;
         } else {
             button.innerHTML = button.dataset.originalText || 'Gửi';

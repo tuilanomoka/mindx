@@ -42,11 +42,20 @@
     }
 
     @keyframes slideUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    .hidden { display: none !important; }
+    .hidden {
+        display: none !important;
+    }
 
     /* Header */
     .learn-header {
@@ -58,16 +67,18 @@
         margin-bottom: 10px;
     }
 
-    .header-title { 
+    .header-title {
         text-align: center;
         flex: 1;
     }
+
     .header-title h1 {
         font-size: 1.8rem;
         color: #F0E491;
         font-weight: 800;
         margin-bottom: 4px;
     }
+
     .tagline {
         font-size: 0.9rem;
         color: rgba(255, 255, 255, 0.7);
@@ -86,13 +97,17 @@
         gap: 5px;
         white-space: nowrap;
     }
+
     .back-btn:hover {
         background: rgba(255, 255, 255, 0.2);
         border-color: #F0E491;
     }
 
     /* Form Elements */
-    .form-group { margin-bottom: 20px; }
+    .form-group {
+        margin-bottom: 20px;
+    }
+
     .input-label {
         display: block;
         margin-bottom: 8px;
@@ -101,10 +116,11 @@
         font-size: 1rem;
     }
 
-    .select-wrapper { 
-        position: relative; 
+    .select-wrapper {
+        position: relative;
         max-width: 200px;
     }
+
     .custom-select {
         width: 100%;
         padding: 12px 16px;
@@ -117,6 +133,7 @@
         outline: none;
         appearance: none;
     }
+
     .custom-select:focus {
         border-color: #F0E491;
         box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
@@ -129,6 +146,7 @@
         padding: 4px;
         transition: all 0.3s;
     }
+
     .math-input-container:focus-within {
         border-color: #F0E491;
         box-shadow: 0 0 15px rgba(240, 228, 145, 0.2);
@@ -162,13 +180,15 @@
         width: 100%;
         box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3);
     }
+
     .primary-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(240, 228, 145, 0.4);
     }
-    .primary-btn:disabled { 
-        opacity: 0.7; 
-        cursor: not-allowed; 
+
+    .primary-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
         transform: none !important;
         box-shadow: 0 4px 12px rgba(240, 228, 145, 0.3) !important;
     }
@@ -191,6 +211,7 @@
         justify-content: center;
         gap: 10px;
     }
+
     .btn-continue:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
@@ -206,11 +227,11 @@
 
     .section-badge {
         display: inline-block;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.1);
         padding: 4px 12px;
         border-radius: 6px;
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.7);
+        color: rgba(255, 255, 255, 0.7);
         margin-bottom: 8px;
         text-transform: uppercase;
         letter-spacing: 1px;
@@ -223,17 +244,18 @@
         text-align: center;
         border: 1px dashed rgba(255, 255, 255, 0.3);
     }
-    .math-content { 
-        font-size: 1.4rem; 
+
+    .math-content {
+        font-size: 1.4rem;
         color: white;
         overflow-x: auto;
     }
 
     /* Steps */
-    .steps-list { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 16px; 
+    .steps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
 
     .step {
@@ -250,7 +272,7 @@
         padding: 12px 20px;
         margin: 0;
         font-size: 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .step-content {
@@ -328,33 +350,49 @@
         animation: spin 0.8s linear infinite;
     }
 
-    .loading-text { 
-        color: #fff; 
+    .loading-text {
+        color: #fff;
         font-weight: 600;
         white-space: nowrap;
     }
 
     @keyframes slideInToast {
-        from { opacity: 0; transform: translateY(20px) scale(0.9); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
-    @keyframes spin { 
-        to { transform: rotate(360deg); } 
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
     }
-    @keyframes fadeIn { 
-        from { opacity: 0; } 
-        to { opacity: 1; } 
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
 
     /* Background effect */
     body::before {
         content: '';
         position: fixed;
-        top: 0; 
-        left: 0; 
-        right: 0; 
+        top: 0;
+        left: 0;
+        right: 0;
         bottom: 0;
-        background: 
+        background:
             radial-gradient(circle at 20% 50%, rgba(240, 228, 145, 0.1) 0%, transparent 50%),
             radial-gradient(circle at 80% 80%, rgba(101, 140, 88, 0.1) 0%, transparent 50%),
             linear-gradient(135deg, #1a3a28 0%, #2d5a41 50%, #1a3a28 100%);
@@ -367,32 +405,32 @@
         .learn-container {
             padding: 20px 15px;
         }
-        
+
         .learn-card {
             padding: 24px 16px;
         }
-        
+
         .learn-header {
             flex-direction: column;
             gap: 15px;
             text-align: center;
         }
-        
+
         .header-title h1 {
             font-size: 1.4rem;
         }
-        
+
         .back-btn {
             align-self: flex-start;
         }
-        
+
         .loading-toast {
             bottom: 20px;
             right: 20px;
             left: 20px;
             justify-content: center;
         }
-        
+
         .step-content {
             padding: 15px;
             font-size: 0.95rem;
@@ -401,16 +439,19 @@
 
     /* Print styles */
     @media print {
-        .back-btn, .btn-continue {
+
+        .back-btn,
+        .btn-continue {
             display: none;
         }
-        
+
         .learn-card {
             box-shadow: none;
             border: 1px solid #ccc;
         }
     }
-        .step-content {
+
+    .step-content {
         padding: 20px;
         color: #e2e8f0;
         line-height: 1.6;
@@ -475,20 +516,22 @@
     .step-content br {
         display: none !important;
     }
-    @keyframes forceInline {
-    from { 
-        display: block !important;
-        margin: 1em 0 !important;
-    }
-    to { 
-        display: inline !important;
-        margin: 0 !important;
-    }
-}
 
-mjx-container {
-    animation: forceInline 0.1s forwards !important;
-}
+    @keyframes forceInline {
+        from {
+            display: block !important;
+            margin: 1em 0 !important;
+        }
+
+        to {
+            display: inline !important;
+            margin: 0 !important;
+        }
+    }
+
+    mjx-container {
+        animation: forceInline 0.1s forwards !important;
+    }
 </style>
 {% endblock %}
 
@@ -531,14 +574,8 @@ mjx-container {
             <div class="form-group">
                 <label for="question" class="input-label">✍️ Nhập bài toán cần giải</label>
                 <div class="math-input-container">
-                    <math-field 
-                        virtual-keyboard-mode="onfocus" 
-                        smart-fence 
-                        id="question" 
-                        name="question"
-                        class="custom-math-field"
-                        placeholder="Nhập biểu thức (ví dụ: x^2 - 4 = 0)..."
-                    ></math-field>
+                    <math-field virtual-keyboard-mode="onfocus" smart-fence id="question" name="question"
+                        class="custom-math-field" placeholder="Nhập biểu thức (ví dụ: x^2 - 4 = 0)..."></math-field>
                 </div>
             </div>
 
@@ -561,7 +598,7 @@ mjx-container {
                     <!-- Steps will be inserted here -->
                 </div>
             </div>
-            
+
             <div id="action-footer" class="footer-actions">
                 <!-- Continue button will be inserted here -->
             </div>
@@ -571,5 +608,5 @@ mjx-container {
 {% endblock %}
 
 {% block linkjs %}
-    <script src="{{ url_for('static', filename='js/learn.js') }}"></script>
+<script src="{{ url_for('static', filename='js/learn.js') }}"></script>
 {% endblock %}

@@ -22,7 +22,7 @@ QUY TẮC QUAN TRỌNG:
 - Latex không nên xuống dòng nhiều quá.
 - KHÔNG DÙNG THẺ HTML NHƯ <span>, chỉ dùng văn bản thuần và LaTeX.
 - ĐẢM BẢO: Dùng \\\\frac thay vì \\frac (HAI BACKSLASH)
-- Trong phần dapan, nếu có công thức toán hoặc thì bắt buộc phải có latex với kí hiệu $.
+- Trong phần dapan, nếu có công thức toán học thì bắt buộc phải có latex với kí hiệu $.
 
 BÀI TOÁN:
 Lớp: {lop}
