@@ -2,20 +2,15 @@
 {% block linkcss %}
 <link rel="stylesheet" href="https://unpkg.com/mathlive/dist/mathlive-static.css" />
 <style type="text/tailwindcss">
-    /* ==================================================================
-       FIX CỰC MẠNH: BUỘC TOÀN BỘ CÔNG THỨC TOÁN HIỂN THỊ INLINE (PRACTICE MODE)
-       ================================================================== */
     .step-content,
     .problem-display,
     .math-content,
     .answer-content,
     #final-answer-content,
     .result {
-        /* Đảm bảo mọi nội dung chứa math đều không bị line-height bất thường */
         line-height: normal !important;
     }
 
-    /* 1. MathJax - ép inline tuyệt đối */
     mjx-container,
     mjx-container * {
         display: inline !important;
@@ -30,7 +25,6 @@
         text-align: left !important;
     }
 
-    /* Vô hiệu hóa hoàn toàn display mode của MathJax */
     mjx-container[jax="CHTML"][display="true"],
     mjx-container[display="true"] {
         display: inline !important;
@@ -38,7 +32,6 @@
         padding: 0 !important;
     }
 
-    /* Fix các wrapper cũ của MathJax */
     .MathJax, .MathJax_Display, .MathJax_Preview, .mjx-full-width {
         display: inline !important;
         text-align: left !important;
@@ -46,12 +39,10 @@
         padding: 0 !important;
     }
 
-    /* 2. MathLive (math-field output) */
     mfenced, math, mrow, mstyle, msup, msub, msqrt, mfrac {
         display: inline !important;
     }
 
-    /* 3. Force reflow để trình duyệt không cache kiểu cũ */
     .math-content mjx-container,
     .step-content mjx-container,
     #problem mjx-container,
@@ -64,16 +55,16 @@
         to   { display: inline; margin: 0 2px; }
     }
 
-    /* ==================================================================
-       FIX KHUNG NHẬP MATH-FIELD (QUÁ NHỎ → LỚN HƠN, DỄ NHẬP HƠN)
-       ================================================================== */
     .math-input-container {
         background: rgba(0, 0, 0, 0.35);
         border: 2px solid rgba(240, 228, 145, 0.4);
         border-radius: 16px;
-        padding: 8px 12px;               /* Tăng padding */
+        padding: 12px;
         transition: all 0.3s ease;
-        min-height: 66px;                 /* Đảm bảo chiều cao tối thiểu */
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
     }
 
     .math-input-container:focus-within {
@@ -84,9 +75,9 @@
 
     math-field {
         width: 100% !important;
-        min-height: 50px;                 /* Tăng chiều cao vùng nhập */
-        font-size: 1.5rem !important;     /* Chữ lớn hơn, dễ đọc/dễ bấm */
-        padding: 12px 8px !important;     /* Padding bên trong */
+        min-height: 50px;
+        font-size: 1.3rem !important;
+        padding: 15px 8px !important;
         background: transparent !important;
         color: white !important;
         --caret-color: #F0E491;
@@ -95,39 +86,33 @@
         border: none !important;
         outline: none !important;
         border-radius: 12px;
+        line-height: 1.6 !important;
+        flex-grow: 1;
     }
 
-    /* Mobile: tăng thêm kích thước khi dùng bàn phím ảo */
     @media (max-width: 768px) {
         math-field {
-            font-size: 1.7rem !important;
+            font-size: 1.4rem !important;
             min-height: 70px !important;
-            padding: 16px 10px !important;
+            padding: 18px 10px !important;
         }
         .math-input-container {
-            min-height: 90px;
+            min-height: 95px;
             border-radius: 20px;
-            padding: 12px 16px;
+            padding: 14px 16px;
         }
     }
 
-    /* Đảm bảo placeholder cũng lớn */
     math-field::placeholder {
         color: rgba(255, 255, 255, 0.5) !important;
         font-size: 1.2rem !important;
     }
 
-    /* Fix hiện tượng math-field bị cắt trên một số trình duyệt */
     math-field::part(container),
     math-field::part(math-field) {
         min-height: inherit !important;
     }
 
-    /* ==================================================================
-       CÁC STYLE KHÁC GIỮ NGUYÊN (không thay đổi)
-       ================================================================== */
-
-    /* FIX QUAN TRỌNG CHO INLINE MATH - PRACTICE MODE */
     .step-content {
         padding: 20px;
         color: #e2e8f0;
@@ -136,7 +121,6 @@
         word-wrap: break-word;
     }
 
-    /* Reset hoàn toàn MathJax elements */
     .step-content mjx-container {
         display: inline !important;
         margin: 0 !important;
@@ -149,7 +133,6 @@
         min-height: 0 !important;
     }
 
-    /* Force ALL MathJax to be inline */
     mjx-container {
         display: inline !important;
         margin: 0 !important;
@@ -160,7 +143,6 @@
         display: inline !important;
     }
 
-    /* Fix cho các wrapper elements */
     .step-content .MathJax,
     .step-content .MathJax_Display,
     .step-content .MathJax_Preview {
@@ -170,14 +152,12 @@
         text-align: left !important;
     }
 
-    /* Đảm bảo không có float */
     .step-content mjx-container,
     .step-content .MathJax {
         float: none !important;
         clear: none !important;
     }
 
-    /* Fix cho answer content */
     .answer-content mjx-container,
     #final-answer-content mjx-container,
     .result mjx-container {
@@ -186,12 +166,10 @@
         padding: 0 !important;
     }
 
-    /* Override mọi thứ có thể */
     .step-content * {
         white-space: normal !important;
     }
 
-    /* Animation để force inline */
     @keyframes forceInline {
         from { 
             display: block !important;
@@ -352,6 +330,10 @@
             border-radius: 12px;
             padding: 4px;
             transition: all 0.3s;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
         }
         
         .math-input-container:focus-within {
@@ -365,12 +347,13 @@
             background: transparent;
             color: white;
             font-size: 1.2rem;
-            padding: 10px;
+            padding: 15px 10px;
             --caret-color: #F0E491;
             --selection-background-color: rgba(240, 228, 145, 0.3);
             --selection-color: white;
             border: none;
             outline: none;
+            min-height: 60px;
         }
         
         math-field::part(container) {
@@ -600,6 +583,12 @@
             box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
             background: linear-gradient(90deg, #43a047, #5eb363);
         }
+
+        .answer-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
     }
 
     @layer utilities {
@@ -628,7 +617,6 @@
         }
     }
 
-    /* Classes hidden không dùng @apply */
     .hidden { 
         display: none !important; 
     }
@@ -636,7 +624,6 @@
     .step-content.hidden { 
         display: none; 
     }
-    
 </style>
 {% endblock %}
 
